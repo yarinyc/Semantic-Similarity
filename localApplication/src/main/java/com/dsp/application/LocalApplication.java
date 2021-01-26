@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class LocalApplication {
 
-    private final static String s3InputPath = "s3://datasets.elasticmapreduce/ngrams/books/20090715/heb-all/3gram/data";
+    private final static String s3InputPath = "### ENTER DATA SET URL ###";
     private final static String EMR_EC2_DEFAULT_ROLE = "EMR_EC2_DefaultRole";
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
     private final static int NUM_OF_INSTANCES = 8;
@@ -97,7 +97,7 @@ public class LocalApplication {
                 .withPlacement(new PlacementType("us-east-1a"));
 
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
-                .withName("dsp2-Trigrams")
+                .withName("dsp3-Biarcs")
                 .withInstances(instances)
                 .withSteps(stepConfig1 , stepConfig2/*, stepConfig3, stepConfig4, stepConfig5, stepConfig6*/)
                 .withServiceRole(EMR_DEFAULT_ROLE)

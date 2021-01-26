@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>com.dsp</groupId>
-  <artifactId>step1ReformatBiarcs</artifactId>
+  <artifactId>step3CountFeatures</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
 
@@ -46,7 +46,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>com.dsp.step1ReformatBiarcs.Step1ReformatBiarcs</mainClass>
+              <mainClass>com.dsp.step3CountFeatures.Step3CountFeatures</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

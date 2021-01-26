@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>com.dsp</groupId>
-  <artifactId>step1ReformatBiarcs</artifactId>
+  <artifactId>step4CountLexemes</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
 
@@ -40,13 +40,13 @@
           </execution>
         </executions>
         <configuration>
-          <finalName>step3CountFeatures</finalName>
+          <finalName>step4CountLexemes</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <outputDirectory>../jars</outputDirectory>
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>com.dsp.step1ReformatBiarcs.Step1ReformatBiarcs</mainClass>
+              <mainClass>com.dsp.step4CountLexemes.Step4CountLexemes</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

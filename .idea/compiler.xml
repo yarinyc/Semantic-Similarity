@@ -9,7 +9,9 @@
         <module name="parent" />
         <module name="localApplication" />
         <module name="step2CountLexemesFeatures" />
+        <module name="step4CountLexemes" />
         <module name="step1ReformatBiarcs" />
+        <module name="step3CountFeatures" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -18,6 +20,8 @@
       <module name="parent" target="8" />
       <module name="step1ReformatBiarcs" target="1.8" />
       <module name="step2CountLexemesFeatures" target="1.8" />
+      <module name="step3CountFeatures" target="1.8" />
+      <module name="step4CountLexemes" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

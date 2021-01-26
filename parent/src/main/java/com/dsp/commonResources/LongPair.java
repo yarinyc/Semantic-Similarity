@@ -3,12 +3,13 @@ package com.dsp.commonResources;
 import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class LongPair extends Joinable<LongPair>{
+public class LongPair implements WritableComparable<LongPair> {
     private LongWritable value_0;
     private LongWritable value_1;
     private Text type;
@@ -33,12 +34,6 @@ public class LongPair extends Joinable<LongPair>{
 
     public LongWritable getValue_1() {
         return value_1;
-    }
-
-    @Override
-    // Joinable interface impl
-    public String getType() {
-        return type.toString();
     }
 
     public void setType(Text type) {

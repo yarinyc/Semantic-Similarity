@@ -7,6 +7,8 @@
       <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
       <module fileurl="file://$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" filepath="$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" />
       <module fileurl="file://$PROJECT_DIR$/step2CountLexemesFeatures/step2CountLexemesFeatures.iml" filepath="$PROJECT_DIR$/step2CountLexemesFeatures/step2CountLexemesFeatures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" filepath="$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" filepath="$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" />
     </modules>
   </component>
 </project>

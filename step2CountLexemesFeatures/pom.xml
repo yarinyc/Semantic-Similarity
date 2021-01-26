@@ -40,13 +40,13 @@
           </execution>
         </executions>
         <configuration>
-          <finalName>countTrigrams</finalName>
+          <finalName>step2CountLexemesFeatures</finalName>
           <appendAssemblyId>false</appendAssemblyId>
           <outputDirectory>../jars</outputDirectory>
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>com.dsp.countTrigrams.CountTrigrams</mainClass>
+              <mainClass>com.dsp.step2CountLexemesFeatures.Step2CountLexemesFeatures</mainClass>
             </manifest>
           </archive>
           <descriptorRefs>

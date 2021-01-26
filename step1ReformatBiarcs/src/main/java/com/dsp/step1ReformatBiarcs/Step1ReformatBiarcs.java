@@ -58,7 +58,6 @@ public class Step1ReformatBiarcs {
         Job job = new Job(conf, "reformatBiarcs");
         job.setJarByClass(Step1ReformatBiarcs.class);
         job.setMapperClass(Step1ReformatBiarcs.MapperClass.class);
-        job.setCombinerClass(Step1ReformatBiarcs.ReducerClass.class);
         job.setPartitionerClass(Step1ReformatBiarcs.PartitionerClass.class);
         job.setReducerClass(Step1ReformatBiarcs.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);
