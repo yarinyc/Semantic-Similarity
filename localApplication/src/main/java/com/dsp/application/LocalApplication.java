@@ -15,7 +15,7 @@ public class LocalApplication {
     private final static String s3InputPath = "s3://s3bucket-d797b2f9e96963c2/input/test_input_dsp3.txt";
     private final static String EMR_EC2_DEFAULT_ROLE = "EMR_EC2_DefaultRole";
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
-    private final static int NUM_OF_INSTANCES = 8;
+    private final static int NUM_OF_INSTANCES = 2;
     private final static boolean DELETE_OUTPUTS = true;
     private final static boolean DEBUG = true;
 

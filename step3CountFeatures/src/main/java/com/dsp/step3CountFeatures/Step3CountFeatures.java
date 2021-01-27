@@ -62,6 +62,7 @@ public class Step3CountFeatures {
         String output = args[3];
 
         // set debug flag for logging
+        System.err.println(args[4]);
         boolean debug = Boolean.parseBoolean(args[4]);
         GeneralUtils.setDebug(debug);
 
