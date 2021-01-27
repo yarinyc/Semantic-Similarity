@@ -29,12 +29,12 @@ public class Biarc implements WritableComparable<Biarc> {
     public Biarc(String rootLexeme, List<String> features, long totalCount) {
         this.rootLexeme = new Text(rootLexeme);
         this.totalCount = new LongWritable(totalCount);
-//        List<Text> textList = features.stream().map(s -> new Text(s)).collect(Collectors.toList());
-//        Text[] textArray = new Text[textList.size()];
-//        textArray = textList.toArray(textArray);
-//        this.features = new TupleWritable(textArray);
-        Object[] textArray = features.stream().map(s -> new Text(s)).toArray(); // check if this works
-        this.features = new TupleWritable((Text[]) textArray);
+        List<Text> textList = features.stream().map(s -> new Text(s)).collect(Collectors.toList());
+        Text[] textArray = new Text[textList.size()];
+        textArray = textList.toArray(textArray);
+        this.features = new TupleWritable(textArray);
+//        Object[] textArray = features.stream().map(s -> new Text(s)).toArray(); // check if this works
+//        this.features = new TupleWritable((Text[]) textArray);
     }
 
     public Text getRootLexeme() {
