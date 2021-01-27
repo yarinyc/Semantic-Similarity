@@ -10,31 +10,27 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Biarc implements WritableComparable<Biarc> {
     private Text rootLexeme;
-    private TupleWritable features;
+    private Text features;
     private LongWritable totalCount;
 
     //constructors
     public Biarc() {
         GeneralUtils.logPrint("Biarc: called empty constructor");
         this.rootLexeme = new Text("");
-        this.features = new TupleWritable();
+        this.features = new Text("");
         this.totalCount = new LongWritable(-1);
     }
 
     public Biarc(String rootLexeme, List<String> features, long totalCount) {
         this.rootLexeme = new Text(rootLexeme);
         this.totalCount = new LongWritable(totalCount);
-        List<Text> textList = features.stream().map(s -> new Text(s)).collect(Collectors.toList());
-        Text[] textArray = new Text[textList.size()];
-        textArray = textList.toArray(textArray);
-        this.features = new TupleWritable(textArray);
-//        Object[] textArray = features.stream().map(s -> new Text(s)).toArray(); // check if this works
-//        this.features = new TupleWritable((Text[]) textArray);
+        this.features = new Text(features.toString());
     }
 
     public Text getRootLexeme() {
@@ -45,11 +41,11 @@ public class Biarc implements WritableComparable<Biarc> {
         this.rootLexeme = rootLexeme;
     }
 
-    public TupleWritable getFeatures() {
-        return features;
+    public List<String> getFeatures() {
+        return Arrays.asList(features.toString().substring(1, features.toString().length()-1).split(", "));
     }
 
-    public void setFeatures(TupleWritable features) {
+    public void setFeatures(Text features) {
         this.features = features;
     }
 
@@ -69,20 +65,20 @@ public class Biarc implements WritableComparable<Biarc> {
     @Override
     public void write(DataOutput dataOutput) throws IOException {
         dataOutput.writeUTF(this.rootLexeme.toString());
-        features.write(dataOutput);
+        dataOutput.writeUTF(this.features.toString());
         dataOutput.writeLong(this.totalCount.get());
     }
 
     @Override
     public void readFields(DataInput dataInput) throws IOException {
         this.rootLexeme = new Text(dataInput.readUTF());
-        features.readFields(dataInput);
+        this.features = new Text(dataInput.readUTF());
         this.totalCount = new LongWritable(dataInput.readLong());
     }
 
     @Override
     public String toString(){
-       return String.format("%s,%s,%s", rootLexeme.toString(), totalCount.get(), features.toString());
+       return String.format("%s\t%s\t%s", rootLexeme.toString(), totalCount.get(), features.toString());
     }
 
     // biarc format: head_word<TAB>syntactic-ngram<TAB>total_count<TAB>counts_by_year
@@ -95,11 +91,12 @@ public class Biarc implements WritableComparable<Biarc> {
         int rootIndex = -1; // index of the root in the biarc
         for (int i = 0; i < biarc.length; i++) {
             String[] s = biarc[i].split("/");
-            if(s[0].equals(root)){
+            if(GeneralUtils.stem(s[0], stemmer).equals(root)){
                 rootIndex = i+1; // in the dataset, position in the biarc starts from 1
             }
             biarcWords.add(s);
         }
+        System.out.println("rooIndex: " + rootIndex);
         // find all features that depend on the root word
         List<String> features = new ArrayList<>();
         for (String[] biarcWord : biarcWords) {

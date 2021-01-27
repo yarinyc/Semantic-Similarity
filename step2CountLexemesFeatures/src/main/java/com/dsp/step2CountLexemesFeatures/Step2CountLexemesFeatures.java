@@ -16,6 +16,10 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Step2CountLexemesFeatures {
 
@@ -24,9 +28,8 @@ public class Step2CountLexemesFeatures {
         // for each biarc emit all its features + total count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
-            for (int i=0; i< value.getFeatures().size(); i++) {
-                Text feature = (Text)value.getFeatures().get(i);
-                Text outKey = new Text(value.getRootLexeme().toString() + "," + feature.toString());
+            for (String feature : value.getFeatures()) {
+                Text outKey = new Text(value.getRootLexeme().toString() + "," + feature);
                 GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
                 context.write(outKey, value.getTotalCount());
             }
