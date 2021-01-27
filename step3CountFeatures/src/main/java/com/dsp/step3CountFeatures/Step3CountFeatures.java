@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
+import java.util.Arrays;
 
 public class Step3CountFeatures {
 
@@ -28,6 +29,7 @@ public class Step3CountFeatures {
         @Override
         public void map(Text key, LongWritable value, Context context) throws IOException,  InterruptedException {
             String[] lexemeFeaturePair = GeneralUtils.parsePair(key.toString());
+            System.out.println("step3 map, <L,F> pair =  "+ Arrays.toString(lexemeFeaturePair));
             GeneralUtils.logPrint("In step3 map: feature = " + lexemeFeaturePair[1] + " count = " + value);
             context.write(new Text(lexemeFeaturePair[1]), value);
         }
