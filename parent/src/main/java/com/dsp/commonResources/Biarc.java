@@ -42,6 +42,9 @@ public class Biarc implements WritableComparable<Biarc> {
     }
 
     public List<String> getFeatures() {
+        if(features.toString().equals("[]")){
+            return new ArrayList<>();
+        }
         return Arrays.asList(features.toString().substring(1, features.toString().length()-1).split(", "));
     }
 
@@ -96,7 +99,6 @@ public class Biarc implements WritableComparable<Biarc> {
             }
             biarcWords.add(s);
         }
-        System.out.println("rooIndex: " + rootIndex);
         // find all features that depend on the root word
         List<String> features = new ArrayList<>();
         for (String[] biarcWord : biarcWords) {
