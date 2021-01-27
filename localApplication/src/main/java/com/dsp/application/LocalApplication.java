@@ -102,7 +102,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 , stepConfig2/*, stepConfig3, stepConfig4, stepConfig5, stepConfig6*/)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4/*, stepConfig5, stepConfig6*/)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")

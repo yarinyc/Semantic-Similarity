@@ -83,7 +83,7 @@ public class Step4CountLexemes {
         job.setOutputFormatClass(TextOutputFormat.class);
 
 
-        Path inputPath = new Path(input);
+        Path inputPath = new Path(s3BucketUrl+input);
         FileInputFormat.addInputPath(job, inputPath);
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
