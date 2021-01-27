@@ -12,6 +12,10 @@ public class GeneralUtils {
         COUNTF
     }
 
+    public static void setDebug(boolean val){
+        DEBUG = val;
+    }
+
     public static void logPrint(String message){
         if(DEBUG){
             String s = String.format("%s - %s", new Date().toString(), message);
@@ -27,4 +31,15 @@ public class GeneralUtils {
         }
         return res;
     }
+
+    // use the stemmer to create a lexeme for any string
+    public static String stem(String str, Stemmer stemmer){
+        for (int i = 0; i <str.length() ; i++) {
+            stemmer.add(str.charAt(i));
+        }
+        stemmer.stem();
+        return stemmer.toString();
+    }
+
+
 }

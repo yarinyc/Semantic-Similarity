@@ -3,6 +3,8 @@ package com.dsp.step4CountLexemes;
 import com.dsp.commonResources.Biarc;
 import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -16,6 +18,8 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URI;
 
 public class Step4CountLexemes {
 
@@ -23,6 +27,7 @@ public class Step4CountLexemes {
         // for each lexeme  emit lexeme with it's count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
+            GeneralUtils.logPrint("In step4 map: lexeme = " + key.toString() + " count = " + value.getTotalCount().get());
             context.write(key, value.getTotalCount());
         }
     }
@@ -36,6 +41,7 @@ public class Step4CountLexemes {
                 sum += value.get();
             }
             context.getCounter(GeneralUtils.Counters.COUNTL).increment(1);
+            GeneralUtils.logPrint("In step4 reduce: lexeme = " + key.toString() + " count = " + sum);
             context.write(key, new LongWritable(sum));
         }
     }
@@ -53,6 +59,10 @@ public class Step4CountLexemes {
         String s3BucketUrl = String.format("s3://%s/", s3BucketName);
         String input = args[2];
         String output = args[3];
+
+        // set debug flag for logging
+        boolean debug = Boolean.parseBoolean(args[4]);
+        GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
 
@@ -75,6 +85,17 @@ public class Step4CountLexemes {
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
         boolean isDone = job.waitForCompletion(true);
+
+        FileSystem fileSystem = FileSystem.get(URI.create("s3://" + s3BucketName), conf);
+        FSDataOutputStream fsDataOutputStream = fileSystem.create(new Path("s3://" + s3BucketName +"/COUNTL"));
+
+        PrintWriter writer  = new PrintWriter(fsDataOutputStream);
+        String countL = Long.toString(job.getCounters().findCounter(GeneralUtils.Counters.COUNTL).getValue());
+        writer.write(countL);
+        GeneralUtils.logPrint("in end of step4: COUNTL="+countL);
+
+        writer.close();
+        fsDataOutputStream.close();
 
         System.exit(isDone ? 0 : 1);
     }

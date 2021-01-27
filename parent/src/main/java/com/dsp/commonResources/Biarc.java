@@ -2,6 +2,7 @@ package com.dsp.commonResources;
 
 
 import com.dsp.utils.GeneralUtils;
+import com.dsp.utils.Stemmer;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.lib.join.TupleWritable;
 
@@ -86,10 +87,9 @@ public class Biarc implements WritableComparable<Biarc> {
 
     // biarc format: head_word<TAB>syntactic-ngram<TAB>total_count<TAB>counts_by_year
     // syntactic-ngram format: space separated values -> word/pos-tag/dep-label/head-index
-    public static Biarc parseBiarc(String line){
+    public static Biarc parseBiarc(String line, Stemmer stemmer){
         String[] words = line.split("\t");
-        String root = words[0];
-        //TODO use stemmer on root
+        String root =  GeneralUtils.stem(words[0], stemmer);
         String[] biarc = words[1].split(" ");
         List<String[]> biarcWords = new ArrayList<>();
         int rootIndex = -1; // index of the root in the biarc
@@ -105,8 +105,8 @@ public class Biarc implements WritableComparable<Biarc> {
         for (String[] biarcWord : biarcWords) {
             int dependencyIndex = Integer.parseInt(biarcWord[3]);
             if(dependencyIndex == rootIndex){
-                String feature = biarcWord[0]+ "-" + biarcWord[2];
-                //TODO use stemmer on biarcWord[0]
+                String stemmedWord = GeneralUtils.stem(biarcWord[0], stemmer);
+                String feature = stemmedWord + "-" + biarcWord[2];
                 features.add(feature);
             }
         }

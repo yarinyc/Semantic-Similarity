@@ -1,6 +1,8 @@
 package com.dsp.step1ReformatBiarcs;
 
 import com.dsp.commonResources.Biarc;
+import com.dsp.utils.GeneralUtils;
+import com.dsp.utils.Stemmer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -19,11 +21,15 @@ import java.io.IOException;
 public class Step1ReformatBiarcs {
 
     public static class MapperClass extends Mapper<LongWritable, Text, Text, Biarc> {
+
+        public Stemmer stemmer = new Stemmer();
+
         // parse each line of the data into a Biarc object
         // each Biarc object holds the root lexeme, list of features & total count
         @Override
         public void map(LongWritable lineID, Text line, Context context) throws IOException,  InterruptedException {
-            Biarc inputBiarc = Biarc.parseBiarc(line.toString());
+            Biarc inputBiarc = Biarc.parseBiarc(line.toString() ,stemmer);
+            GeneralUtils.logPrint("In step1 map: lexeme " + lineID + " Biarc = " + inputBiarc.toString());
             context.write(inputBiarc.getRootLexeme(), inputBiarc);
         }
     }
@@ -52,6 +58,10 @@ public class Step1ReformatBiarcs {
         String input = args[2];
         String output = args[3];
 
+        // set debug flag for logging
+        boolean debug = Boolean.parseBoolean(args[4]);
+        GeneralUtils.setDebug(debug);
+
         Configuration conf = new Configuration();
         conf.set("bucketName", s3BucketName);
 
@@ -73,17 +83,6 @@ public class Step1ReformatBiarcs {
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output)); // "step_1_results/"
 
         boolean isDone = job.waitForCompletion(true);
-
-//        FileSystem fileSystem = FileSystem.get(URI.create("s3://" + s3BucketName), conf);
-//        FSDataOutputStream fsDataOutputStream = fileSystem.create(new Path("s3://" + s3BucketName +"/N"));
-//
-//        PrintWriter writer  = new PrintWriter(fsDataOutputStream);
-//        String nValue = Long.toString(job.getCounters().findCounter(GeneralUtils.Counters.N).getValue());
-//        writer.write(nValue);
-//        GeneralUtils.logPrint("in end of step1: N="+nValue);
-//
-//        writer.close();
-//        fsDataOutputStream.close();
 
         System.exit(isDone ? 0 : 1);
     }

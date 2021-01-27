@@ -1,6 +1,7 @@
 package com.dsp.step2CountLexemesFeatures;
 
 import com.dsp.commonResources.Biarc;
+import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -26,6 +27,7 @@ public class Step2CountLexemesFeatures {
             for (int i=0; i< value.getFeatures().size(); i++) {
                 Text feature = (Text)value.getFeatures().get(i);
                 Text outKey = new Text(value.getRootLexeme().toString() + "," + feature.toString());
+                GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
                 context.write(outKey, value.getTotalCount());
             }
         }
@@ -40,6 +42,7 @@ public class Step2CountLexemesFeatures {
             for (LongWritable value : values) {
                 sum += value.get();
             }
+            GeneralUtils.logPrint("In step2 reduce: <lexeme,feature> = " + key.toString() + " count = " + sum);
             context.write(key, new LongWritable(sum));
         }
     }
@@ -57,6 +60,10 @@ public class Step2CountLexemesFeatures {
         String s3BucketUrl = String.format("s3://%s/", s3BucketName);
         String input = args[2];
         String output = args[3];
+
+        // set debug flag for logging
+        boolean debug = Boolean.parseBoolean(args[4]);
+        GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
 

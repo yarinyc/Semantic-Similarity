@@ -5,6 +5,8 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
 import com.amazonaws.services.elasticmapreduce.model.*;
+import com.dsp.utils.GeneralUtils;
+import com.dsp.utils.Stemmer;
 
 import java.io.IOException;
 
@@ -15,6 +17,7 @@ public class LocalApplication {
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
     private final static int NUM_OF_INSTANCES = 8;
     private final static boolean DELETE_OUTPUTS = true;
+    private final static boolean DEBUG = true;
 
     public static void main(String[] args){
 
@@ -27,25 +30,25 @@ public class LocalApplication {
         AmazonElasticMapReduce mapReduce = AmazonElasticMapReduceClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
         HadoopJarStepConfig hadoopJarStep1 = new HadoopJarStepConfig()
-                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/countTrigrams.jar")
-                .withArgs(localAppConfiguration.getS3BucketName(), s3InputPath, "step_1_results/")
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step1ReformatBiarcs.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), s3InputPath, "step_1_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step1ReformatBiarcs");
 
         HadoopJarStepConfig hadoopJarStep2 = new HadoopJarStepConfig()
-                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/computeNr.jar")
-                .withArgs(localAppConfiguration.getS3BucketName(), "step_1_results/", "step_2_results/")
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step2CountLexemesFeatures.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_1_results/", "step_2_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step2CountLexemesFeatures");
 
-//        HadoopJarStepConfig hadoopJarStep3 = new HadoopJarStepConfig()
-//                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/computeTr.jar")
-//                .withArgs(localAppConfiguration.getS3BucketName())
-//                .withMainClass("ComputeTr");
-//
-//        HadoopJarStepConfig hadoopJarStep4 = new HadoopJarStepConfig()
-//                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/computeProbability.jar")
-//                .withArgs(localAppConfiguration.getS3BucketName())
-//                .withMainClass("ComputeProbability");
-//
+        HadoopJarStepConfig hadoopJarStep3 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step3CountFeatures.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(),"step_2_results/", "step_3_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step3CountFeatures");
+
+        HadoopJarStepConfig hadoopJarStep4 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step4CountLexemes.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_1_results/", "step_4_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step4CountLexemes");
+
 //        HadoopJarStepConfig hadoopJarStep5 = new HadoopJarStepConfig()
 //                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/joinAndComputeProbability.jar")
 //                .withArgs(localAppConfiguration.getS3BucketName())
@@ -67,16 +70,16 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep2)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
-//        StepConfig stepConfig3 = new StepConfig()
-//                .withName("compute Tr")
-//                .withHadoopJarStep(hadoopJarStep3)
-//                .withActionOnFailure("TERMINATE_JOB_FLOW");
-//
-//        StepConfig stepConfig4 = new StepConfig()
-//                .withName("compute probability")
-//                .withHadoopJarStep(hadoopJarStep4)
-//                .withActionOnFailure("TERMINATE_JOB_FLOW");
-//
+        StepConfig stepConfig3 = new StepConfig()
+                .withName("count features")
+                .withHadoopJarStep(hadoopJarStep3)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
+
+        StepConfig stepConfig4 = new StepConfig()
+                .withName("count lexemes")
+                .withHadoopJarStep(hadoopJarStep4)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
+
 //        StepConfig stepConfig5 = new StepConfig()
 //                .withName("join P and Trigrams")
 //                .withHadoopJarStep(hadoopJarStep5)
