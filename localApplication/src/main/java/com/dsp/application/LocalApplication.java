@@ -117,12 +117,13 @@ public class LocalApplication {
     private static void cleanS3Bucket(LocalAppConfiguration localAppConfiguration) {
         String bucketName = localAppConfiguration.getS3BucketName();
         try {
-//            Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/N");
+            Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTL");
+            Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTF");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/logs/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_1_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_2_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
 //            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
 //            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
         } catch (IOException e) {

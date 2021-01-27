@@ -25,6 +25,7 @@ public class GeneralUtils {
 
     // parse string coded (comma separated) pairs : VAL1,VAL2
     public static String[] parsePair(String pair){
+        logPrint("in parsePair: pair = "+pair);
         String[] res = pair.split(",");
         if(res.length > 2){
             throw new RuntimeException("In parsePair: input was not a pair");
