@@ -33,6 +33,19 @@ public class Step4CountLexemes {
         }
     }
 
+    public static class CombinerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+        // for each lexeme calculate sum( calculates count(F=f) & count(F) )
+        @Override
+        public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
+            long sum = 0;
+            for (LongWritable value : values) {
+                sum += value.get();
+            }
+            GeneralUtils.logPrint("In step4 combiner: lexeme = " + key.toString() + " count = " + sum);
+            context.write(key, new LongWritable(sum));
+        }
+    }
+
     public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
         // for each lexeme calculate sum & increase COUNTL counter by 1 ( calculates count(F=f) & count(F) )
         @Override
@@ -70,7 +83,7 @@ public class Step4CountLexemes {
         Job job = new Job(conf, "step4CountLexemes");
         job.setJarByClass(Step4CountLexemes.class);
         job.setMapperClass(Step4CountLexemes.MapperClass.class);
-        job.setCombinerClass(Step4CountLexemes.ReducerClass.class);
+        job.setCombinerClass(Step4CountLexemes.CombinerClass.class);
         job.setPartitionerClass(Step4CountLexemes.PartitionerClass.class);
         job.setReducerClass(Step4CountLexemes.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);

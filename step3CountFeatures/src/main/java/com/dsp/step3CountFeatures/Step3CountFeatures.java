@@ -35,6 +35,19 @@ public class Step3CountFeatures {
         }
     }
 
+    public static class CombinerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+        // for each feature calculate sum ( calculates count(F=f) & count(F) )
+        @Override
+        public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
+            long sum = 0;
+            for (LongWritable value : values) {
+                sum += value.get();
+            }
+            GeneralUtils.logPrint("In step3 combiner: feature = " + key.toString() + " count = " + sum);
+            context.write(key, new LongWritable(sum));
+        }
+    }
+
     public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
         // for each feature calculate sum & increase COUNTF counter by 1 ( calculates count(F=f) & count(F) )
         @Override
@@ -73,7 +86,7 @@ public class Step3CountFeatures {
         Job job = new Job(conf, "step3CountFeatures");
         job.setJarByClass(Step3CountFeatures.class);
         job.setMapperClass(Step3CountFeatures.MapperClass.class);
-        job.setCombinerClass(Step3CountFeatures.ReducerClass.class);
+        job.setCombinerClass(Step3CountFeatures.CombinerClass.class);
         job.setPartitionerClass(Step3CountFeatures.PartitionerClass.class);
         job.setReducerClass(Step3CountFeatures.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);
