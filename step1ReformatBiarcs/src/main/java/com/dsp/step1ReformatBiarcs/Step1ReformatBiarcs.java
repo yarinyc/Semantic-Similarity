@@ -26,6 +26,7 @@ public class Step1ReformatBiarcs {
 
         // parse each line of the data into a Biarc object
         // each Biarc object holds the root lexeme, list of features & total count
+        // emit key=rootLexeme, value = Biarc object
         @Override
         public void map(LongWritable lineID, Text line, Context context) throws IOException,  InterruptedException {
             Biarc inputBiarc = Biarc.parseBiarc(line.toString() ,stemmer);

@@ -29,7 +29,11 @@ public class Step4CountLexemes {
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
             GeneralUtils.logPrint("In step4 map: lexeme = " + key.toString() + " count = " + value.getTotalCount().get());
-            context.write(key, value.getTotalCount());
+            LongWritable count = value.getTotalCount();
+            String[] biarcWords = value.getBiarcWords().toString().split("\t");
+            for(String s : biarcWords ) {
+                context.write(new Text(s), count);
+            }
         }
     }
 

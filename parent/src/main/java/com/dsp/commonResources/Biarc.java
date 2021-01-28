@@ -3,8 +3,9 @@ package com.dsp.commonResources;
 
 import com.dsp.utils.GeneralUtils;
 import com.dsp.utils.Stemmer;
-import org.apache.hadoop.io.*;
-import org.apache.hadoop.mapreduce.lib.join.TupleWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -12,10 +13,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Biarc implements WritableComparable<Biarc> {
     private Text rootLexeme;
+    private Text biarcWords;
     private Text features;
     private LongWritable totalCount;
 
@@ -23,14 +24,16 @@ public class Biarc implements WritableComparable<Biarc> {
     public Biarc() {
         GeneralUtils.logPrint("Biarc: called empty constructor");
         this.rootLexeme = new Text("");
+        this.biarcWords = new Text("");
         this.features = new Text("");
         this.totalCount = new LongWritable(-1);
     }
 
-    public Biarc(String rootLexeme, List<String> features, long totalCount) {
+    public Biarc(String rootLexeme,String biarcWords, List<String> features, long totalCount) {
         this.rootLexeme = new Text(rootLexeme);
-        this.totalCount = new LongWritable(totalCount);
+        this.biarcWords = new Text(biarcWords);
         this.features = new Text(features.toString());
+        this.totalCount = new LongWritable(totalCount);
     }
 
     public Text getRootLexeme() {
@@ -39,6 +42,14 @@ public class Biarc implements WritableComparable<Biarc> {
 
     public void setRootLexeme(Text rootLexeme) {
         this.rootLexeme = rootLexeme;
+    }
+
+    public Text getBiarcWords() {
+        return biarcWords;
+    }
+
+    public void setBiarcWords(Text biarcWords) {
+        this.biarcWords = biarcWords;
     }
 
     public List<String> getFeatures() {
@@ -68,6 +79,7 @@ public class Biarc implements WritableComparable<Biarc> {
     @Override
     public void write(DataOutput dataOutput) throws IOException {
         dataOutput.writeUTF(this.rootLexeme.toString());
+        dataOutput.writeUTF(this.biarcWords.toString());
         dataOutput.writeUTF(this.features.toString());
         dataOutput.writeLong(this.totalCount.get());
     }
@@ -75,13 +87,14 @@ public class Biarc implements WritableComparable<Biarc> {
     @Override
     public void readFields(DataInput dataInput) throws IOException {
         this.rootLexeme = new Text(dataInput.readUTF());
+        this.biarcWords = new Text(dataInput.readUTF());
         this.features = new Text(dataInput.readUTF());
         this.totalCount = new LongWritable(dataInput.readLong());
     }
 
     @Override
     public String toString(){
-       return String.format("%s\t%s\t%s", rootLexeme.toString(), totalCount.get(), features.toString());
+       return String.format("%s\t%s\t%s\t%s", rootLexeme.toString(), biarcWords.toString(), totalCount.get(), features.toString());
     }
 
     // biarc format: head_word<TAB>syntactic-ngram<TAB>total_count<TAB>counts_by_year
@@ -101,17 +114,27 @@ public class Biarc implements WritableComparable<Biarc> {
         }
         // find all features that depend on the root word
         List<String> features = new ArrayList<>();
+        List<String> stemmedWords = new ArrayList<>();
         for (String[] biarcWord : biarcWords) {
             int dependencyIndex = Integer.parseInt(biarcWord[3]);
+            String stemmedWord = GeneralUtils.stem(biarcWord[0], stemmer);
+            stemmedWords.add(stemmedWord);
             if(dependencyIndex == rootIndex){
-                String stemmedWord = GeneralUtils.stem(biarcWord[0], stemmer);
                 String feature = stemmedWord + "-" + biarcWord[2];
                 features.add(feature);
             }
         }
 
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<stemmedWords.size(); i++) {
+            sb.append(stemmedWords.get(i));
+            if(i < stemmedWords.size() - 1) {
+                sb.append("\t");
+            }
+        }
+
         long totalCount = Long.parseLong(words[2]);
-        return new Biarc(root,features,totalCount);
+        return new Biarc(root,sb.toString(),features,totalCount);
     }
 
 }
