@@ -16,6 +16,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Step2CountLexemesFeatures {
 
@@ -24,11 +25,31 @@ public class Step2CountLexemesFeatures {
         // for each biarc emit all its features + total count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
-            for (String feature : value.getFeatures()) {
-                Text outKey = new Text(value.getRootLexeme().toString() + "," + feature);
-                GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
-                context.write(outKey, value.getTotalCount());
+
+            String[] biarcWords = value.getBiarcWords().toString().split("\t");
+            List<String> dependencies = value.getDependencies();
+            List<String> features = value.getFeatures();
+            LongWritable count = value.getTotalCount();
+
+            //for each word in biarc + all it's features in the biarc, emit the biarc count
+            // key = <lexeme,feature> (<stemmed word in biarc,feature>), value = count
+            for(int i=0; i<biarcWords.length; i++){
+                int dependencyIndex = Integer.parseInt(dependencies.get(i)) - 1;
+                if(dependencyIndex != -1) {
+                    String lexeme = biarcWords[dependencyIndex];
+                    String feature = features.get(i);
+
+                    Text outKey = new Text(lexeme + "," + feature);
+                    GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
+                    context.write(outKey, count);
+                }
+
             }
+//            for (String feature : value.getFeatures()) {
+//                Text outKey = new Text(value.getRootLexeme().toString() + "," + feature);
+//                GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
+//                context.write(outKey, value.getTotalCount());
+//            }
         }
     }
 
