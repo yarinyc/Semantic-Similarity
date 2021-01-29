@@ -24,6 +24,12 @@ public class Step1ReformatBiarcs {
 
         public Stemmer stemmer = new Stemmer();
 
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // parse each line of the data into a Biarc object
         // each Biarc object holds the root lexeme, list of features & total count
         // emit key=rootLexeme, value = Biarc object
@@ -36,6 +42,13 @@ public class Step1ReformatBiarcs {
     }
 
     public static class ReducerClass extends Reducer<Text, Biarc, Text, Biarc> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // no logic in reducer just emit the same
         @Override
         public void reduce(Text key, Iterable<Biarc> values, Context context) throws IOException,  InterruptedException {
@@ -61,10 +74,11 @@ public class Step1ReformatBiarcs {
 
         // set debug flag for logging
         boolean debug = Boolean.parseBoolean(args[4]);
-        GeneralUtils.setDebug(debug);
+        System.err.println("debug str: " + args[0] + "debug boolean: "+debug);
 
         Configuration conf = new Configuration();
-        conf.set("bucketName", s3BucketName);
+        GeneralUtils.setDebug(debug);
+        conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "reformatBiarcs");
         job.setJarByClass(Step1ReformatBiarcs.class);
