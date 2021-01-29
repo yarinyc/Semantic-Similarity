@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class GeneralUtils {
 
-    public static Boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     public enum Counters{
         COUNTL,
