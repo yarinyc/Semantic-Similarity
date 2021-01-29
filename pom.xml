@@ -19,7 +19,7 @@
     <module>step2CountLexemesFeatures</module>
     <module>step3CountFeatures</module>
     <module>step4CountLexemes</module>
-<!--    <module>sortOutput</module>-->
+    <module>step5Join1</module>
 <!--    <module>sortOutput</module>-->
 <!--    <module>sortOutput</module>-->
 <!--    <module>sortOutput</module>-->

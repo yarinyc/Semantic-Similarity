@@ -9,6 +9,7 @@
         <module name="parent" />
         <module name="localApplication" />
         <module name="step2CountLexemesFeatures" />
+        <module name="step5Join1" />
         <module name="step4CountLexemes" />
         <module name="step1ReformatBiarcs" />
         <module name="step3CountFeatures" />
@@ -22,6 +23,7 @@
       <module name="step2CountLexemesFeatures" target="1.8" />
       <module name="step3CountFeatures" target="1.8" />
       <module name="step4CountLexemes" target="1.8" />
+      <module name="step5Join1" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

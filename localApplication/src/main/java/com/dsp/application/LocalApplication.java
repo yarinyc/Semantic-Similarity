@@ -47,11 +47,11 @@ public class LocalApplication {
                 .withArgs(localAppConfiguration.getS3BucketName(), "step_1_results/", "step_4_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step4CountLexemes");
 
-//        HadoopJarStepConfig hadoopJarStep5 = new HadoopJarStepConfig()
-//                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/joinAndComputeProbability.jar")
-//                .withArgs(localAppConfiguration.getS3BucketName())
-//                .withMainClass("JoinAndComputeProbability");
-//
+        HadoopJarStepConfig hadoopJarStep5 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step5Join1.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_2_results/\tstep_4_results", "step_5_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step5Join1");
+
 //        HadoopJarStepConfig hadoopJarStep6 = new HadoopJarStepConfig()
 //                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/sortOutput.jar")
 //                .withArgs(localAppConfiguration.getS3BucketName())
@@ -78,11 +78,11 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep4)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
-//        StepConfig stepConfig5 = new StepConfig()
-//                .withName("join P and Trigrams")
-//                .withHadoopJarStep(hadoopJarStep5)
-//                .withActionOnFailure("TERMINATE_JOB_FLOW");
-//
+        StepConfig stepConfig5 = new StepConfig()
+                .withName("join count(L=l) & count(F=f,L=l)")
+                .withHadoopJarStep(hadoopJarStep5)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
+
 //        StepConfig stepConfig6 = new StepConfig()
 //                .withName("sort output")
 //                .withHadoopJarStep(hadoopJarStep6)
@@ -100,7 +100,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4/*, stepConfig5, stepConfig6*/)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5/*, stepConfig6*/)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -122,7 +122,7 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_2_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
 //            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
         } catch (IOException e) {
             e.printStackTrace();
