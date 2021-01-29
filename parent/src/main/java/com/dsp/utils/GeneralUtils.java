@@ -17,7 +17,7 @@ public class GeneralUtils {
     }
 
     public static void logPrint(String message){
-        if(DEBUG){
+        if(true){
             String s = String.format("%s - %s", new Date().toString(), message);
             System.err.println(s);
         }
