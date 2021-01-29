@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class GeneralUtils {
 
-    public static boolean DEBUG = false;
+    public static Boolean DEBUG = false;
 
     public enum Counters{
         COUNTL,
@@ -17,7 +17,7 @@ public class GeneralUtils {
     }
 
     public static void logPrint(String message){
-        if(true){
+        if(DEBUG){
             String s = String.format("%s - %s", new Date().toString(), message);
             System.err.println(s);
         }
