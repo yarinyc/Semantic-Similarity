@@ -7,6 +7,7 @@ import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuild
 import com.amazonaws.services.elasticmapreduce.model.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class LocalApplication {
 

@@ -120,12 +120,8 @@ public class Biarc implements WritableComparable<Biarc> {
         String root =  GeneralUtils.stem(words[0], stemmer);
         String[] biarc = words[1].split(" ");
         List<String[]> biarcWords = new ArrayList<>();
-//        int rootIndex = -1; // index of the root in the biarc
         for (int i = 0; i < biarc.length; i++) {
             String[] s = biarc[i].split("/");
-//            if(GeneralUtils.stem(s[0], stemmer).equals(root)){
-//                rootIndex = i+1; // in the dataset, position in the biarc starts from 1
-//            }
             biarcWords.add(s);
         }
         // find all features that depend on the root word
@@ -133,18 +129,12 @@ public class Biarc implements WritableComparable<Biarc> {
         List<String> stemmedWords = new ArrayList<>();
         List<String> dependencyIndices = new ArrayList<>();
         for (String[] biarcWord : biarcWords) {
-//            int dependencyIndex = Integer.parseInt(biarcWord[3]);
             String stemmedWord = GeneralUtils.stem(biarcWord[0], stemmer);
             stemmedWords.add(stemmedWord);
-//            if(dependencyIndex == rootIndex){
             String feature = stemmedWord + "-" + biarcWord[2];
             features.add(feature);
-
             dependencyIndices.add(biarcWord[3]);
-//            }
         }
-
-
 
         StringBuilder sb = new StringBuilder();
         for (int i=0; i<stemmedWords.size(); i++) {

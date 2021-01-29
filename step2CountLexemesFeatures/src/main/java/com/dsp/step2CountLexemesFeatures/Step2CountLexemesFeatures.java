@@ -45,11 +45,6 @@ public class Step2CountLexemesFeatures {
                 }
 
             }
-//            for (String feature : value.getFeatures()) {
-//                Text outKey = new Text(value.getRootLexeme().toString() + "," + feature);
-//                GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
-//                context.write(outKey, value.getTotalCount());
-//            }
         }
     }
 

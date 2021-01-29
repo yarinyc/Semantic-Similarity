@@ -1,53 +1,127 @@
 package com.dsp.step5Join1;
 
-import com.dsp.commonResources.LongPair;
 import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.WritableComparable;
+import org.apache.hadoop.io.WritableComparator;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
 public class Step5Join1 {
 
-
-    public static class MapperClass extends Mapper<LongWritable, Text, Text, LongPair> {
+    public static class MapperClass extends Mapper<Text, LongWritable, Text, Text> {
 
         @Override
-        public void map(LongWritable rowID, Text line, Context context) throws IOException,  InterruptedException {
+        public void map(Text key, LongWritable count, Context context) throws IOException,  InterruptedException {
+            //we emit key=lexeme/<feature,lexeme> (depending on input file of K-V pair) and value = tag (L/LF) + count of key
+            //the partitioner sends files according to only the lexeme word
+            String value = "";
+            if(key.toString().split(",").length == 1){
+                value = "L\t" + count.toString();
+            }
+            else{
+                value = "LF\t" + count.toString();
+            }
 
+            GeneralUtils.logPrint("in step5 map: emitting key = "+ key.toString() + ", value = " + value);
+            context.write(key,new Text(value));
         }
     }
 
-    public static class ReducerClass extends Reducer<Text, LongPair,Text, LongPair> {
+    public static class ReducerClass extends Reducer<Text, Text,Text, Text> {
 
         @Override
-        public void reduce(Text key, Iterable<LongPair> values, Context context) throws IOException,  InterruptedException {
+        public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
+            String countLl = "null";
 
+            for(Text value : values){
+                String[] splittedValue = value.toString().split("\t");
+                GeneralUtils.logPrint("in step5 reduce: received key = " + key.toString() + "value = " + value.toString());
+                //we made sure count(L=l) came first (before all count(F=f,L=l)
+                if(splittedValue[0].equals("L")){
+                    countLl = splittedValue[1];
+                }
+                //if the value is of tag "LF", i.e it is of count(F=f,L=l)
+                else{
+                    //emit key = Feature, value=<count(F=f,L=l),count(L=l)>
+                    String feature = key.toString().split(",")[1];
+                    String countLF = splittedValue[1];
+                    context.write(new Text(feature), new Text(countLF+"\t"+countLl));
+                }
+            }
         }
     }
 
-    public static class PartitionerClass extends Partitioner<Text, LongPair> {
+    public static class PartitionerClass extends Partitioner<Text, Text> {
         @Override
-        public int getPartition(Text key, LongPair value, int numPartitions) {
-            return Math.abs(key.hashCode() % numPartitions);
+        public int getPartition(Text key, Text value, int numPartitions) {
+            // foreign key is the lexeme (split key at index 0)
+            String lexeme = key.toString().split(",")[0];
+            return Math.abs(lexeme.hashCode() % numPartitions);
         }
     }
+
+    // A comparator for text, to make sure the K-V pair of the lexeme count (Count(L=l)) comes to the reducer before
+    // all <lexeme,feature> counts (Count(L=l,F=f))
+    public static class TextKeyComparator extends WritableComparator {
+        protected TextKeyComparator() {
+            super(Text.class, true);
+        }
+
+        @Override
+        public int compare(WritableComparable o1, WritableComparable o2) {
+            Text key1 = (Text) o1;
+            Text key2 = (Text) o2;
+            String[] split1 = key1.toString().split(",");
+            String[] split2 = key2.toString().split(",");
+            //split key with length of 1 is of count(L=l), so it comes first in order
+            if(split1.length == 1 && split2.length == 2){
+                GeneralUtils.logPrint("in TextComparator: received key = " + split1[0]);
+                return -1;
+            }
+            else if(split1.length == 2 && split2.length == 1){
+                return 1;
+            }
+            else return 0;
+        }
+    }
+
+    // Grouping comparator to make sure all lexeme and <lexeme,feature> keys arrive to the same reducer according only to lexeme
+    public static class GroupingComparator extends WritableComparator {
+        protected GroupingComparator() {
+            super(Text.class, true);
+        }
+
+        @Override
+        public int compare(WritableComparable o1, WritableComparable o2) {
+            Text key1 = (Text) o1;
+            Text key2 = (Text) o2;
+            String lexeme1 = key1.toString().split(",")[0];
+            String lexeme2 = key2.toString().split(",")[0];
+            GeneralUtils.logPrint("in GroupingComparator: received keys = " + lexeme1 + " " + lexeme2);
+            return lexeme1.compareTo(lexeme2);
+        }
+    }
+
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
 
         String s3BucketName = args[1];
         String s3BucketUrl = String.format("s3://%s/", s3BucketName);
         String input = args[2]; // TODO separate \t inputs
+        String[] joinInputs = input.split("\t");
         String output = args[3];
 
         // set debug flag for logging
@@ -59,19 +133,21 @@ public class Step5Join1 {
         Job job = new Job(conf, "step5Join1");
         job.setJarByClass(Step5Join1.class);
         job.setMapperClass(Step5Join1.MapperClass.class);
-        job.setCombinerClass(Step5Join1.ReducerClass.class);
         job.setPartitionerClass(Step5Join1.PartitionerClass.class);
+        job.setGroupingComparatorClass(Step5Join1.GroupingComparator.class);
+        job.setSortComparatorClass(Step5Join1.TextKeyComparator.class);
         job.setReducerClass(Step5Join1.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(LongPair.class);
+        job.setMapOutputValueClass(Text.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongPair.class);
+        job.setOutputValueClass(Text.class);
 
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+//        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
-        Path inputPath = new Path(s3BucketUrl+input);
-        FileInputFormat.addInputPath(job, inputPath);
+        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[0]), SequenceFileInputFormat.class, Step5Join1.MapperClass.class);
+        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[1]), SequenceFileInputFormat.class, Step5Join1.MapperClass.class);
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
         boolean isDone = job.waitForCompletion(true);
