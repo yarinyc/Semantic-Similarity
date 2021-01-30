@@ -115,7 +115,7 @@ public class Step5Join1 {
             Text key2 = (Text) o2;
             String lexeme1 = key1.toString().split(",")[0];
             String lexeme2 = key2.toString().split(",")[0];
-            GeneralUtils.logPrint("in GroupingComparator: received keys = " + lexeme1 + " " + lexeme2);
+            GeneralUtils.logPrint("in GroupingComparator: received keys = " + key1.toString() + " " + key2.toString() + " returned " + lexeme1.compareTo(lexeme2));
             return lexeme1.compareTo(lexeme2);
         }
     }
