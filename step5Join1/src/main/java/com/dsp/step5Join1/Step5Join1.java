@@ -43,15 +43,17 @@ public class Step5Join1 {
 
     public static class ReducerClass extends Reducer<Text, Text,Text, Text> {
 
+        public static String classUuid = UUID.randomUUID().toString().replace("-","");
+
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
             String countLl = "null";
 
-            String uuid = UUID.randomUUID().toString();
+            String uuid = UUID.randomUUID().toString().replace("-","");
 
             for(Text value : values){
                 String[] splittedValue = value.toString().split("\t");
-                GeneralUtils.logPrint("in step5 reduce " + uuid +": received key = " + key.toString() + "value = " + value.toString());
+                GeneralUtils.logPrint("reducer id: " + classUuid + " in step5 reduce uuid: " + uuid +": received key = " + key.toString() + " value = " + value.toString());
                 //we made sure count(L=l) came first (before all count(F=f,L=l)
                 if(splittedValue[0].equals("L")){
                     countLl = splittedValue[1];
