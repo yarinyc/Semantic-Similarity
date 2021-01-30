@@ -1,12 +1,12 @@
 package com.dsp.step6Join2;
 
+import com.dsp.commonResources.AssocCalculator;
 import com.dsp.utils.GeneralUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.io.WritableComparator;
@@ -22,6 +22,9 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Step6Join2 {
 
@@ -46,14 +49,14 @@ public class Step6Join2 {
             }
 
             GeneralUtils.logPrint("in step6 map: emitting key = "+ key.toString() + ", value = " + val);
-            context.write(key,new Text(value));
+            context.write(key,new Text(val));
         }
     }
 
     public static class ReducerClass extends Reducer<Text, Text,Text, Text> {
 
-        private static Long countL; //count(L)
-        private static Long countF; //count(F)
+        private static Long countAllLexemes; //count(L)
+        private static Long countAllFeatures; //count(F)
 
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
@@ -66,13 +69,13 @@ public class Step6Join2 {
 
             FSDataInputStream fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTL")));
             String input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
-            countL = Long.valueOf(input);
-            GeneralUtils.logPrint("in setup step6: count(L)=" + countL);
+            countAllLexemes = Long.valueOf(input);
+            GeneralUtils.logPrint("in setup step6: count(L)=" + countAllLexemes);
 
             fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTF")));
             input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
-            countF = Long.valueOf(input);
-            GeneralUtils.logPrint("in setup step6: count(F)=" + countF);
+            countAllFeatures = Long.valueOf(input);
+            GeneralUtils.logPrint("in setup step6: count(F)=" + countAllFeatures);
 
             fsDataInputStream.close();
             fileSystem.close();
@@ -90,11 +93,16 @@ public class Step6Join2 {
                 }
                 //if the value is of tag "LF", i.e it is of <count(F=f,L=l),count(L=l)>
                 else{
-                    //emit key = <l,f>, value=<count(F=f,L=l),count(L=l),count(F=f)>
                     String newKey = splitValue[1]; // <lexeme,feature>
                     String[] counters = splitValue[2].split(",");
+                    //newValue=<count(F=f,L=l),count(L=l),count(F=f)>
                     String newValue = counters[0]+","+countF;
-                    context.write(new Text(newKey), new Text(newValue));
+                    //calculate all assoc values according to the formulas in the article
+                    List<Long> counts = Arrays.stream(newValue.split(",")).map(Long::parseLong).collect(Collectors.toList());
+//                    context.write(new Text(newKey), new Text(newValue));
+                    AssocCalculator assocCalculator = new AssocCalculator(countAllLexemes, countAllFeatures, counts.get(1), counts.get(2), counts.get(0));
+                    List<Number> assocs = assocCalculator.getAllAssocValues();
+                    context.write(new Text(newKey), new Text(assocs.toString()));
                 }
             }
         }
@@ -109,7 +117,7 @@ public class Step6Join2 {
         }
     }
 
-    // A comparator for text, to make sure the K-V pair of the lexeme count (Count(L=l)) comes to the reducer before
+    // A comparator for text, to make sure the K-V pair of the lexeme count (Count(F=f)) comes to the reducer before
     // all <lexeme,feature> counts (Count(L=l,F=f))
     public static class TextKeyComparator extends WritableComparator {
         protected TextKeyComparator() {
@@ -123,7 +131,7 @@ public class Step6Join2 {
             String[] split1 = key1.toString().split(",");
             String[] split2 = key2.toString().split(",");
             int compareVal = split1[0].compareTo(split2[0]);
-            //split key with length of 1 is of count(L=l), so it comes first in order
+            //split key with length of 1 is of count(F=f), so it comes first in order
             if(compareVal==0){
                 if(split1.length == 1 && split2.length == 2){
                     GeneralUtils.logPrint("in TextComparator: received key = " + split1[0]);
