@@ -33,7 +33,7 @@ public class Step5Join1 {
                 value = "L\t" + count.toString(); // key is from count(L=l)
             }
             else{
-                value = "LF\t" + count.toString(); // key is from count(F=f,L=l)
+                value = key.toString().split(",")[1]+"\t" + count.toString(); // key is from count(F=f,L=l)
             }
 
             GeneralUtils.logPrint("in step5 map: emitting key = "+ key.toString() + ", value = " + value);
@@ -61,7 +61,7 @@ public class Step5Join1 {
                 //if the value is of tag "LF", i.e it is of count(F=f,L=l)
                 else{
                     //emit key = Feature, value=<count(F=f,L=l),count(L=l)>
-                    String feature = key.toString().split(",")[1];
+                    String feature = splittedValue[0];
                     String countLF = splittedValue[1];
                     context.write(new Text(feature), new Text(countLF+"\t"+countLl));
                 }
