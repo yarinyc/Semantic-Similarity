@@ -25,15 +25,21 @@ public class Step5Join1 {
     public static class MapperClass extends Mapper<Text, LongWritable, Text, Text> {
 
         @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
+        @Override
         public void map(Text key, LongWritable count, Context context) throws IOException,  InterruptedException {
             //we emit key=lexeme/<feature,lexeme> (depending on input file of K-V pair) and value = tag (L/LF) + count of key
             //the partitioner sends files according to only the lexeme word
-            String value = "";
+            String value;
             if(key.toString().split(",").length == 1){ //String.split returns array with the original string if split is not possible
                 value = "L\t" + count.toString(); // key is from count(L=l)
             }
             else{
-                value = "LF\t" + count.toString(); // key is from count(F=f,L=l)
+                value = "LF\t" + key.toString() + "\t"+ count.toString(); // key is from count(F=f,L=l): value will include the <l,f> as well
             }
 
             GeneralUtils.logPrint("in step5 map: emitting key = "+ key.toString() + ", value = " + value);
@@ -43,27 +49,28 @@ public class Step5Join1 {
 
     public static class ReducerClass extends Reducer<Text, Text,Text, Text> {
 
-        public static String classUuid = UUID.randomUUID().toString().replace("-","");
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
-            String countLl = "null";
-
-            String uuid = UUID.randomUUID().toString().replace("-","");
-
+            String countL = "dummy-value";
             for(Text value : values){
-                String[] splittedValue = value.toString().split("\t");
-                GeneralUtils.logPrint("reducer id: " + classUuid + " in step5 reduce uuid: " + uuid +": received key = " + key.toString() + " value = " + value.toString());
+                String[] splitValue = value.toString().split("\t");
+                GeneralUtils.logPrint("in step5 reduce: received key = " + key.toString() + " value = " + value.toString());
                 //we made sure count(L=l) came first (before all count(F=f,L=l)
-                if(splittedValue[0].equals("L")){
-                    countLl = splittedValue[1];
+                if(splitValue[0].equals("L")){
+                    countL = splitValue[1];
                 }
                 //if the value is of tag "LF", i.e it is of count(F=f,L=l)
                 else{
                     //emit key = Feature, value=<count(F=f,L=l),count(L=l)>
-                    String feature = key.toString().split(",")[1];
-                    String countLF = splittedValue[1];
-                    context.write(new Text(feature), new Text(countLF+"\t"+countLl));
+                    String newKey = splitValue[1]; //<lexeme,feature>
+                    String countLF = splitValue[2];
+                    context.write(new Text(newKey), new Text(countLF+"\t"+countL));
                 }
             }
         }
@@ -91,8 +98,9 @@ public class Step5Join1 {
             Text key2 = (Text) o2;
             String[] split1 = key1.toString().split(",");
             String[] split2 = key2.toString().split(",");
+            int compareVal = split1[0].compareTo(split2[0]);
             //split key with length of 1 is of count(L=l), so it comes first in order
-            if(split1[0].compareTo(split2[0])==0){
+            if(compareVal==0){
                 if(split1.length == 1 && split2.length == 2){
                     GeneralUtils.logPrint("in TextComparator: received key = " + split1[0]);
                     return -1;
@@ -103,7 +111,7 @@ public class Step5Join1 {
                 else return 0;
             }
             else{
-                return split1[0].compareTo(split2[0]);
+                return compareVal;
             }
         }
     }
