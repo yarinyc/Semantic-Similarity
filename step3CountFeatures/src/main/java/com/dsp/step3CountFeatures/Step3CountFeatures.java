@@ -61,7 +61,7 @@ public class Step3CountFeatures {
         }
     }
 
-    public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+    public static class ReducerClass extends Reducer<Text, LongWritable, Text, Text> {
 
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
@@ -78,7 +78,7 @@ public class Step3CountFeatures {
             }
             context.getCounter(GeneralUtils.Counters.COUNTF).increment(1);
             GeneralUtils.logPrint("In step3 reduce: feature = " + key.toString() + " count = " + sum);
-            context.write(key, new LongWritable(sum));
+            context.write(key, new Text(Long.toString(sum)));
         }
     }
 
@@ -112,11 +112,11 @@ public class Step3CountFeatures {
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(LongWritable.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongWritable.class);
+        job.setOutputValueClass(Text.class);
 
         job.setInputFormatClass(SequenceFileInputFormat.class);
-//        job.setOutputFormatClass(SequenceFileOutputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+//        job.setOutputFormatClass(TextOutputFormat.class);
 
         Path inputPath = new Path(s3BucketUrl+input);
         FileInputFormat.addInputPath(job, inputPath);

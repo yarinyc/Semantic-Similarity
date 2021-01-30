@@ -24,19 +24,6 @@ public class LocalApplication {
 
     public static void main(String[] args){
 
-        List<Number> assocs = new ArrayList<>();
-        assocs.add(3L);
-        assocs.add(7F);
-        assocs.add(3.17);
-        long x = (long)assocs.get(0);
-        System.out.println("x="+x);
-        float y = (float)assocs.get(1);
-        System.out.println("y="+y);
-
-        double z = (double)assocs.get(2);
-        System.out.println("z="+z);
-        System.exit(0);
-
         LocalAppConfiguration localAppConfiguration = new LocalAppConfiguration();
 
         s3InputPath = localAppConfiguration.getS3InputPath();
@@ -72,10 +59,10 @@ public class LocalApplication {
                 .withArgs(localAppConfiguration.getS3BucketName(), "step_2_results/\tstep_4_results", "step_5_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step5Join1");
 
-//        HadoopJarStepConfig hadoopJarStep6 = new HadoopJarStepConfig()
-//                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/sortOutput.jar")
-//                .withArgs(localAppConfiguration.getS3BucketName())
-//                .withMainClass("SortOutput");
+        HadoopJarStepConfig hadoopJarStep6 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step6Join2.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_5_results/\tstep_3_results", "step_6_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step6Join2");
 
 
         StepConfig stepConfig1 = new StepConfig()
@@ -103,10 +90,10 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep5)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
-//        StepConfig stepConfig6 = new StepConfig()
-//                .withName("sort output")
-//                .withHadoopJarStep(hadoopJarStep6)
-//                .withActionOnFailure("TERMINATE_JOB_FLOW");
+        StepConfig stepConfig6 = new StepConfig()
+                .withName("join count(L=l) & count(F=f,L=l) & count(F=f)")
+                .withHadoopJarStep(hadoopJarStep6)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
 
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
                 .withInstanceCount(NUM_OF_INSTANCES)
@@ -120,7 +107,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(/*stepConfig1 , stepConfig2, stepConfig3, stepConfig4,*/ stepConfig5/*, stepConfig6*/)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -138,12 +125,12 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTL");
             Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTF");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/logs/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_1_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_2_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_1_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_2_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
         } catch (IOException e) {
             e.printStackTrace();
         }

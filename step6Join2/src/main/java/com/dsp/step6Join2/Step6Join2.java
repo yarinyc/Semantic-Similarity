@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Step6Join2 {
 
-    public static class MapperClass extends Mapper<Text, LongWritable, Text, Text> {
+    public static class MapperClass extends Mapper<Text, Text, Text, Text> {
 
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
@@ -34,18 +34,18 @@ public class Step6Join2 {
         }
 
         @Override
-        public void map(Text key, LongWritable count, Context context) throws IOException,  InterruptedException {
+        public void map(Text key, Text value, Context context) throws IOException,  InterruptedException {
             //we emit key=feature/<feature,lexeme> (depending on input file of K-V pair) and value = tag (F/LF) + count of key
             //the partitioner sends files according to only the lexeme word
-            String value;
+            String val;
             if(key.toString().split(",").length == 1){ //String.split returns array with the original string if split is not possible
-                value = "F\t" + count.toString(); // key is from count(F=f)
+                val = "F\t" + value.toString(); // key is from count(F=f)
             }
             else{
-                value = "LF\t" + key.toString() + "\t"+ count.toString(); // key is from count(F=f,L=l): value will include the <l,f> as well
+                val = "LF\t" + key.toString() + "\t"+ value.toString(); // key is from count(F=f,L=l): value will include the <l,f> as well
             }
 
-            GeneralUtils.logPrint("in step6 map: emitting key = "+ key.toString() + ", value = " + value);
+            GeneralUtils.logPrint("in step6 map: emitting key = "+ key.toString() + ", value = " + val);
             context.write(key,new Text(value));
         }
     }
@@ -67,11 +67,12 @@ public class Step6Join2 {
             FSDataInputStream fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTL")));
             String input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
             countL = Long.valueOf(input);
+            GeneralUtils.logPrint("in setup step6: count(L)=" + countL);
 
             fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTF")));
             input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
             countF = Long.valueOf(input);
-            GeneralUtils.logPrint("in setup step6: count(F=f)=" + countF);
+            GeneralUtils.logPrint("in setup step6: count(F)=" + countF);
 
             fsDataInputStream.close();
             fileSystem.close();
