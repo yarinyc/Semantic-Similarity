@@ -25,6 +25,13 @@ import java.util.Arrays;
 public class Step3CountFeatures {
 
     public static class MapperClass extends Mapper<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each <lexeme,feature> pair, emit feature with it's count
         @Override
         public void map(Text key, LongWritable value, Context context) throws IOException,  InterruptedException {
@@ -35,6 +42,13 @@ public class Step3CountFeatures {
     }
 
     public static class CombinerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each feature calculate sum ( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
@@ -48,6 +62,13 @@ public class Step3CountFeatures {
     }
 
     public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each feature calculate sum & increase COUNTF counter by 1 ( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
@@ -76,11 +97,11 @@ public class Step3CountFeatures {
         String output = args[3];
 
         // set debug flag for logging
-        System.err.println(args[4]);
         boolean debug = Boolean.parseBoolean(args[4]);
         GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
+        conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "step3CountFeatures");
         job.setJarByClass(Step3CountFeatures.class);

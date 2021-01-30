@@ -18,6 +18,7 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class Step5Join1 {
 
@@ -28,11 +29,11 @@ public class Step5Join1 {
             //we emit key=lexeme/<feature,lexeme> (depending on input file of K-V pair) and value = tag (L/LF) + count of key
             //the partitioner sends files according to only the lexeme word
             String value = "";
-            if(key.toString().split(",").length == 1){
-                value = "L\t" + count.toString();
+            if(key.toString().split(",").length == 1){ //String.split returns array with the original string if split is not possible
+                value = "L\t" + count.toString(); // key is from count(L=l)
             }
             else{
-                value = "LF\t" + count.toString();
+                value = "LF\t" + count.toString(); // key is from count(F=f,L=l)
             }
 
             GeneralUtils.logPrint("in step5 map: emitting key = "+ key.toString() + ", value = " + value);
@@ -46,9 +47,11 @@ public class Step5Join1 {
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
             String countLl = "null";
 
+            String uuid = UUID.randomUUID().toString();
+
             for(Text value : values){
                 String[] splittedValue = value.toString().split("\t");
-                GeneralUtils.logPrint("in step5 reduce: received key = " + key.toString() + "value = " + value.toString());
+                GeneralUtils.logPrint("in step5 reduce " + uuid +": received key = " + key.toString() + "value = " + value.toString());
                 //we made sure count(L=l) came first (before all count(F=f,L=l)
                 if(splittedValue[0].equals("L")){
                     countLl = splittedValue[1];
@@ -120,7 +123,7 @@ public class Step5Join1 {
 
         String s3BucketName = args[1];
         String s3BucketUrl = String.format("s3://%s/", s3BucketName);
-        String input = args[2]; // TODO separate \t inputs
+        String input = args[2];
         String[] joinInputs = input.split("\t");
         String output = args[3];
 
@@ -129,6 +132,7 @@ public class Step5Join1 {
         GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
+        conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "step5Join1");
         job.setJarByClass(Step5Join1.class);

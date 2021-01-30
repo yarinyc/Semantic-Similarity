@@ -11,6 +11,7 @@ public class LocalAppConfiguration {
     private String s3BucketName;
     private String s3BucketUrl;
     private String awsKeyPair;
+    private String s3InputPath;
 
     public LocalAppConfiguration() {
         readConfigFile();
@@ -24,12 +25,13 @@ public class LocalAppConfiguration {
         } catch (IOException e) {
             return;
         }
-        if(conf.size() < 2 ){
+        if(conf.size() < 3 ){
             System.out.println("not enough arguments in config");
             System.exit(1);
         }
         s3BucketName = conf.get(0);
         awsKeyPair = conf.get(1);
+        s3InputPath = conf.get(2);
     }
 
     public String getS3BucketName() {
@@ -42,6 +44,10 @@ public class LocalAppConfiguration {
 
     public String getS3BucketUrl() {
         return s3BucketUrl;
+    }
+
+    public String getS3InputPath() {
+        return s3InputPath;
     }
 
     public void setS3BucketUrl(String s3BucketUrl) {

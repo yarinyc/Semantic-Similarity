@@ -74,10 +74,9 @@ public class Step1ReformatBiarcs {
 
         // set debug flag for logging
         boolean debug = Boolean.parseBoolean(args[4]);
-        System.err.println("debug str: " + args[0] + "debug boolean: "+debug);
+        GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
-        GeneralUtils.setDebug(debug);
         conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "reformatBiarcs");

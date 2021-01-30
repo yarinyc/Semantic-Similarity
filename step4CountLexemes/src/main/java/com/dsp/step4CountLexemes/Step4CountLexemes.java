@@ -25,6 +25,13 @@ import java.net.URI;
 public class Step4CountLexemes {
 
     public static class MapperClass extends Mapper<Text, Biarc, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each lexeme  emit lexeme with it's count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
@@ -38,6 +45,13 @@ public class Step4CountLexemes {
     }
 
     public static class CombinerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each lexeme calculate sum( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
@@ -51,6 +65,13 @@ public class Step4CountLexemes {
     }
 
     public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each lexeme calculate sum & increase COUNTL counter by 1 ( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
@@ -83,6 +104,7 @@ public class Step4CountLexemes {
         GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
+        conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "step4CountLexemes");
         job.setJarByClass(Step4CountLexemes.class);

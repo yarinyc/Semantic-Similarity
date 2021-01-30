@@ -22,6 +22,12 @@ public class Step2CountLexemesFeatures {
 
     public static class MapperClass extends Mapper<Text, Biarc, Text, LongWritable> {
 
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
+
         // for each biarc emit all its features + total count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
@@ -49,6 +55,12 @@ public class Step2CountLexemesFeatures {
     }
 
     public static class ReducerClass extends Reducer<Text, LongWritable, Text, LongWritable> {
+
+        @Override
+        public void setup(Context context) throws IOException, InterruptedException {
+            boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
+            GeneralUtils.setDebug(debug);
+        }
 
         // for each <lexeme,feature>, sum all counts (calculate count(F=f,L=l))
         @Override
@@ -81,6 +93,7 @@ public class Step2CountLexemesFeatures {
         GeneralUtils.setDebug(debug);
 
         Configuration conf = new Configuration();
+        conf.set("DEBUG", Boolean.toString(debug));
 
         Job job = new Job(conf, "countLexemesFeatures");
         job.setJarByClass(Step2CountLexemesFeatures.class);
