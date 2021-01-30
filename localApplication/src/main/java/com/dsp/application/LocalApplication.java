@@ -9,7 +9,9 @@ import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class LocalApplication {
 
@@ -21,6 +23,19 @@ public class LocalApplication {
     private final static boolean DEBUG = true;
 
     public static void main(String[] args){
+
+        List<Number> assocs = new ArrayList<>();
+        assocs.add(3L);
+        assocs.add(7F);
+        assocs.add(3.17);
+        long x = (long)assocs.get(0);
+        System.out.println("x="+x);
+        float y = (float)assocs.get(1);
+        System.out.println("y="+y);
+
+        double z = (double)assocs.get(2);
+        System.out.println("z="+z);
+        System.exit(0);
 
         LocalAppConfiguration localAppConfiguration = new LocalAppConfiguration();
 

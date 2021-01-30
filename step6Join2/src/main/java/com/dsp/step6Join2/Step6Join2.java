@@ -1,7 +1,10 @@
-package com.dsp.step5Join1;
+package com.dsp.step6Join2;
 
 import com.dsp.utils.GeneralUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -14,13 +17,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
-public class Step5Join1 {
+public class Step6Join2 {
 
     public static class MapperClass extends Mapper<Text, LongWritable, Text, Text> {
 
@@ -32,45 +35,65 @@ public class Step5Join1 {
 
         @Override
         public void map(Text key, LongWritable count, Context context) throws IOException,  InterruptedException {
-            //we emit key=lexeme/<feature,lexeme> (depending on input file of K-V pair) and value = tag (L/LF) + count of key
+            //we emit key=feature/<feature,lexeme> (depending on input file of K-V pair) and value = tag (F/LF) + count of key
             //the partitioner sends files according to only the lexeme word
             String value;
             if(key.toString().split(",").length == 1){ //String.split returns array with the original string if split is not possible
-                value = "L\t" + count.toString(); // key is from count(L=l)
+                value = "F\t" + count.toString(); // key is from count(F=f)
             }
             else{
                 value = "LF\t" + key.toString() + "\t"+ count.toString(); // key is from count(F=f,L=l): value will include the <l,f> as well
             }
 
-            GeneralUtils.logPrint("in step5 map: emitting key = "+ key.toString() + ", value = " + value);
+            GeneralUtils.logPrint("in step6 map: emitting key = "+ key.toString() + ", value = " + value);
             context.write(key,new Text(value));
         }
     }
 
     public static class ReducerClass extends Reducer<Text, Text,Text, Text> {
 
+        private static Long countL; //count(L)
+        private static Long countF; //count(F)
+
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
             boolean debug = Boolean.parseBoolean(context.getConfiguration().get("DEBUG"));
             GeneralUtils.setDebug(debug);
+
+            //get count(L) & count(F) from s3
+            String bucketName = context.getConfiguration().get("bucketName");
+            FileSystem fileSystem = FileSystem.get(URI.create("s3://" + bucketName), context.getConfiguration());
+
+            FSDataInputStream fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTL")));
+            String input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+            countL = Long.valueOf(input);
+
+            fsDataInputStream = fileSystem.open(new Path(("s3://" + bucketName + "/COUNTF")));
+            input = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+            countF = Long.valueOf(input);
+            GeneralUtils.logPrint("in setup step6: count(F=f)=" + countF);
+
+            fsDataInputStream.close();
+            fileSystem.close();
         }
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
-            String countL = "dummy-value";
+            String countF = "dummy-value";
             for(Text value : values){
                 String[] splitValue = value.toString().split("\t");
-                GeneralUtils.logPrint("in step5 reduce: received key = " + key.toString() + " value = " + value.toString());
-                //we made sure count(L=l) came first (before all count(F=f,L=l)
-                if(splitValue[0].equals("L")){
-                    countL = splitValue[1];
+                GeneralUtils.logPrint("in step6 reduce: received key = " + key.toString() + " value = " + value.toString());
+                //we made sure count(F=f) came first (before all count(F=f,L=l)
+                if(splitValue[0].equals("F")){
+                    countF = splitValue[1];
                 }
-                //if the value is of tag "LF", i.e it is of count(F=f,L=l)
+                //if the value is of tag "LF", i.e it is of <count(F=f,L=l),count(L=l)>
                 else{
-                    //emit key = <l,f>, value=<count(F=f,L=l),count(L=l)>
-                    String newKey = splitValue[1]; //<lexeme,feature>
-                    String countLF = splitValue[2];
-                    context.write(new Text(newKey), new Text(countLF+"\t"+countL));
+                    //emit key = <l,f>, value=<count(F=f,L=l),count(L=l),count(F=f)>
+                    String newKey = splitValue[1]; // <lexeme,feature>
+                    String[] counters = splitValue[2].split(",");
+                    String newValue = counters[0]+","+countF;
+                    context.write(new Text(newKey), new Text(newValue));
                 }
             }
         }
@@ -147,25 +170,26 @@ public class Step5Join1 {
 
         Configuration conf = new Configuration();
         conf.set("DEBUG", Boolean.toString(debug));
+        conf.set("bucketName", s3BucketName);
 
-        Job job = new Job(conf, "step5Join1");
-        job.setJarByClass(Step5Join1.class);
-        job.setMapperClass(Step5Join1.MapperClass.class);
-        job.setPartitionerClass(Step5Join1.PartitionerClass.class);
-        job.setGroupingComparatorClass(Step5Join1.GroupingComparator.class);
-        job.setSortComparatorClass(Step5Join1.TextKeyComparator.class);
-        job.setReducerClass(Step5Join1.ReducerClass.class);
+        Job job = new Job(conf, "step6Join2");
+        job.setJarByClass(Step6Join2.class);
+        job.setMapperClass(Step6Join2.MapperClass.class);
+        job.setPartitionerClass(Step6Join2.PartitionerClass.class);
+        job.setGroupingComparatorClass(Step6Join2.GroupingComparator.class);
+        job.setSortComparatorClass(Step6Join2.TextKeyComparator.class);
+        job.setReducerClass(Step6Join2.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(Text.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
         job.setInputFormatClass(SequenceFileInputFormat.class);
-        job.setOutputFormatClass(SequenceFileOutputFormat.class);
-//        job.setOutputFormatClass(TextOutputFormat.class);
+//        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+        job.setOutputFormatClass(TextOutputFormat.class);
 
-        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[0]), SequenceFileInputFormat.class, Step5Join1.MapperClass.class);
-        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[1]), SequenceFileInputFormat.class, Step5Join1.MapperClass.class);
+        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[0]), SequenceFileInputFormat.class, Step6Join2.MapperClass.class);
+        MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[1]), SequenceFileInputFormat.class, Step6Join2.MapperClass.class);
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
         boolean isDone = job.waitForCompletion(true);

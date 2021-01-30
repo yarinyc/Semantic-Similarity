@@ -10,6 +10,7 @@
       <module fileurl="file://$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" filepath="$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" />
       <module fileurl="file://$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" filepath="$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" />
       <module fileurl="file://$PROJECT_DIR$/step5Join1/step5Join1.iml" filepath="$PROJECT_DIR$/step5Join1/step5Join1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step6Join2/step6Join2.iml" filepath="$PROJECT_DIR$/step6Join2/step6Join2.iml" />
     </modules>
   </component>
 </project>

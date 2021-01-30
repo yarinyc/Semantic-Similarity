@@ -20,7 +20,7 @@
     <module>step3CountFeatures</module>
     <module>step4CountLexemes</module>
     <module>step5Join1</module>
-<!--    <module>sortOutput</module>-->
+    <module>step6Join2</module>
 <!--    <module>sortOutput</module>-->
 <!--    <module>sortOutput</module>-->
   </modules>
