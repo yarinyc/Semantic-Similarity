@@ -5,13 +5,15 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
 import com.amazonaws.services.elasticmapreduce.model.*;
+import com.dsp.utils.GeneralUtils;
+import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 public class LocalApplication {
 
-    private final static String s3InputPath = "s3://s3bucket-d797b2f9e96963c1/input/test_input_dsp3.txt";
+    private static String s3InputPath = "";
     private final static String EMR_EC2_DEFAULT_ROLE = "EMR_EC2_DefaultRole";
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
     private final static int NUM_OF_INSTANCES = 2;
@@ -21,6 +23,8 @@ public class LocalApplication {
     public static void main(String[] args){
 
         LocalAppConfiguration localAppConfiguration = new LocalAppConfiguration();
+
+        s3InputPath = localAppConfiguration.getS3InputPath();
 
         if(DELETE_OUTPUTS) {
             cleanS3Bucket(localAppConfiguration);
@@ -101,7 +105,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 /*, stepConfig2, stepConfig3, stepConfig4, stepConfig5*//*, stepConfig6*/)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5/*, stepConfig6*/)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
