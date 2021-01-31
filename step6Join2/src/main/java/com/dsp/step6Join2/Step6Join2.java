@@ -97,13 +97,14 @@ public class Step6Join2 {
                     String countLF = splitValue[2];
                     String countL = splitValue[3];
                     //newValue=<count(F=f,L=l),count(L=l),count(F=f)>
-                    String newValue = countLF+"\t"+countL+"\t"+countF;
-                    context.write(new Text(newKey), new Text(newValue));
+//                    String newValue = countLF+"\t"+countL+"\t"+countF;
+//                    context.write(new Text(newKey), new Text(newValue));
+
                     //calculate all assoc values according to the formulas in the article
 //                    List<Long> counts = Arrays.stream(newValue.split(",")).map(Long::parseLong).collect(Collectors.toList());
-//                    AssocCalculator assocCalculator = new AssocCalculator(countAllLexemes, countAllFeatures, Long.parseLong(countL), Long.parseLong(countF), Long.parseLong(countLF));
-//                    List<Number> assocs = assocCalculator.getAllAssocValues();
-//                    context.write(new Text(newKey), new Text(assocs.toString()));
+                    AssocCalculator assocCalculator = new AssocCalculator(countAllLexemes, countAllFeatures, Long.parseLong(countL), Long.parseLong(countF), Long.parseLong(countLF));
+                    List<Number> assocs = assocCalculator.getAllAssocValues();
+                    context.write(new Text(newKey), new Text(assocs.toString()));
                 }
             }
         }
