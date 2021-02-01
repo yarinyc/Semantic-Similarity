@@ -121,7 +121,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6, stepConfig7)
+                .withSteps(/*stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6,*/ stepConfig7)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -144,7 +144,7 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
-            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
+//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_7_results/");
         } catch (IOException e) {
             e.printStackTrace();
