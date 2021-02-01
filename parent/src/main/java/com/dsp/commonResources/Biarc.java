@@ -115,7 +115,7 @@ public class Biarc implements WritableComparable<Biarc> {
 
     // biarc format: head_word<TAB>syntactic-ngram<TAB>total_count<TAB>counts_by_year
     // syntactic-ngram format: space separated values -> word/pos-tag/dep-label/head-index
-    public static Biarc parseBiarc(String line, Stemmer stemmer){
+    public static Biarc parseBiarc(String line, Stemmer stemmer){ // TODO handle words that have the ',' in them (may be wrong for our internal parsing later)
         String[] words = line.split("\t");
         String root =  GeneralUtils.stem(words[0], stemmer);
         String[] biarc = words[1].split(" ");

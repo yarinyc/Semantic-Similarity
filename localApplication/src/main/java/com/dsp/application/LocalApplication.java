@@ -56,13 +56,18 @@ public class LocalApplication {
 
         HadoopJarStepConfig hadoopJarStep5 = new HadoopJarStepConfig()
                 .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step5Join1.jar")
-                .withArgs(localAppConfiguration.getS3BucketName(), "step_2_results/\tstep_4_results", "step_5_results/", Boolean.toString(DEBUG))
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_2_results/\tstep_4_results/", "step_5_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step5Join1");
 
         HadoopJarStepConfig hadoopJarStep6 = new HadoopJarStepConfig()
                 .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step6Join2.jar")
-                .withArgs(localAppConfiguration.getS3BucketName(), "step_5_results/\tstep_3_results", "step_6_results/", Boolean.toString(DEBUG))
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_5_results/\tstep_3_results/", "step_6_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step6Join2");
+
+        HadoopJarStepConfig hadoopJarStep7 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step7CalculateVectors.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_6_results/", "step_7_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step7CalculateVectores");
 
 
         StepConfig stepConfig1 = new StepConfig()
@@ -95,6 +100,11 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep6)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
+        StepConfig stepConfig7 = new StepConfig()
+                .withName("calculate all word vectors")
+                .withHadoopJarStep(hadoopJarStep7)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
+
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
                 .withInstanceCount(NUM_OF_INSTANCES)
                 .withMasterInstanceType(InstanceType.M4Large.toString())
@@ -107,7 +117,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6, stepConfig7)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -131,6 +141,7 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_7_results/");
         } catch (IOException e) {
             e.printStackTrace();
         }

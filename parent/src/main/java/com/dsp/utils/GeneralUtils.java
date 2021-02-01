@@ -1,11 +1,11 @@
 package com.dsp.utils;
 
 import com.dsp.commonResources.Pair;
+import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.fs.FSDataInputStream;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class GeneralUtils {
@@ -47,10 +47,10 @@ public class GeneralUtils {
     }
 
     // parse GS file
-    public static Map<Pair<String,String>, Boolean> parseGoldenStandard(String fileLocation){
+    public static Map<Pair<String,String>, Boolean> parseGoldenStandard(FSDataInputStream fsDataInputStream){
         List<String> lines;
         try {
-            lines = Files.readAllLines(Paths.get(fileLocation), StandardCharsets.UTF_8);
+            lines = IOUtils.readLines(fsDataInputStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
             logPrint(Arrays.toString(e.getStackTrace()));
             return null;
