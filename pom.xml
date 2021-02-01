@@ -21,7 +21,7 @@
     <module>step4CountLexemes</module>
     <module>step5Join1</module>
     <module>step6Join2</module>
-<!--    <module>sortOutput</module>-->
+    <module>step7CalculateVectors</module>
 <!--    <module>sortOutput</module>-->
   </modules>
 

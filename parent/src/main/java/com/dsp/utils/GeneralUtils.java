@@ -1,7 +1,12 @@
 package com.dsp.utils;
 
-import java.util.Date;
+import com.dsp.commonResources.Pair;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class GeneralUtils {
 
@@ -41,5 +46,24 @@ public class GeneralUtils {
         return stemmer.toString();
     }
 
-
+    // parse GS file
+    public static Map<Pair<String,String>, Boolean> parseGoldenStandard(String fileLocation){
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(Paths.get(fileLocation), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logPrint(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+        Map<Pair<String,String>, Boolean> gsMap = new HashMap<>();
+        for (String line : lines){
+            String[] gsLine = line.split("\t");
+            if(line.equals("") || gsLine.length != 3) { // each line in GS should have 3 string: word<TAB>word<TAB>true/false
+                continue;
+            }
+            Pair<String,String> gsPair = Pair.of(gsLine[0], gsLine[1]); // pair of 2 golden standard words
+            gsMap.put(gsPair, Boolean.parseBoolean(gsLine[2]));
+        }
+        return gsMap;
+    }
 }

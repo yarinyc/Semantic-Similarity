@@ -17,14 +17,13 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Step6Join2 {
 
@@ -47,7 +46,6 @@ public class Step6Join2 {
             else{
                 val = "LF\t" + key.toString() + "\t"+ value.toString(); // key is from count(F=f,L=l): value will include the <l,f> as well
             }
-
             GeneralUtils.logPrint("in step6 map: emitting key = "+ key.toString() + ", value = " + val);
             context.write(key,new Text(val));
         }
@@ -96,12 +94,6 @@ public class Step6Join2 {
                     String newKey = splitValue[1]; // <lexeme,feature>
                     String countLF = splitValue[2];
                     String countL = splitValue[3];
-                    //newValue=<count(F=f,L=l),count(L=l),count(F=f)>
-//                    String newValue = countLF+"\t"+countL+"\t"+countF;
-//                    context.write(new Text(newKey), new Text(newValue));
-
-                    //calculate all assoc values according to the formulas in the article
-//                    List<Long> counts = Arrays.stream(newValue.split(",")).map(Long::parseLong).collect(Collectors.toList());
                     AssocCalculator assocCalculator = new AssocCalculator(countAllLexemes, countAllFeatures, Long.parseLong(countL), Long.parseLong(countF), Long.parseLong(countLF));
                     List<Number> assocs = assocCalculator.getAllAssocValues();
                     context.write(new Text(newKey), new Text(assocs.toString()));
@@ -164,26 +156,12 @@ public class Step6Join2 {
             }
             else if(split1.length == 2 && split2.length == 2) {
                 GeneralUtils.logPrint("in TextComparator: case 3 - LF & LF");
-                int compareVal = split1[1].compareTo(split2[1]);
-                if(compareVal == 0){
-                    return 0;
-                }
-                else {
-                    return compareVal;
-                }
+                return split1[1].compareTo(split2[1]);
             }
-            else if(split1.length == 1 && split2.length == 1) {
+            else{ // split1.length == 1 && split2.length == 1
                 GeneralUtils.logPrint("in TextComparator: case 4 - F & F");
-                int compareVal = split1[0].compareTo(split2[0]);
-                if(compareVal == 0){
-                    return 0;
-                }
-                else {
-                    return compareVal;
-                }
+                return split1[0].compareTo(split2[0]);
             }
-            GeneralUtils.logPrint("in TextComparator: error in received keys");
-            return 0; //this should not return;
         }
     }
 
@@ -209,11 +187,9 @@ public class Step6Join2 {
             else if(splitKey1.length == 2 && splitKey2.length == 2) {
                 return splitKey1[1].compareTo(splitKey2[1]);
             }
-            else if(splitKey1.length == 1 && splitKey2.length == 1) {
+            else{  // splitKey1.length == 1 && splitKey2.length == 1
                 return splitKey1[0].compareTo(splitKey2[0]);
             }
-            GeneralUtils.logPrint("in TextComparator: error in received keys");
-            return 0; //this should not return;
         }
     }
 
@@ -246,8 +222,8 @@ public class Step6Join2 {
         job.setOutputValueClass(Text.class);
 
         job.setInputFormatClass(SequenceFileInputFormat.class);
-//        job.setOutputFormatClass(SequenceFileOutputFormat.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(SequenceFileOutputFormat.class);
+//        job.setOutputFormatClass(TextOutputFormat.class);
 
         MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[0]), SequenceFileInputFormat.class, Step6Join2.MapperClass.class);
         MultipleInputs.addInputPath(job, new Path(s3BucketUrl+joinInputs[1]), SequenceFileInputFormat.class, Step6Join2.MapperClass.class);
