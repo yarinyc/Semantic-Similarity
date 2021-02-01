@@ -34,6 +34,8 @@ public class LocalApplication {
 
         AmazonElasticMapReduce mapReduce = AmazonElasticMapReduceClientBuilder.standard().withRegion(Regions.US_EAST_1).build();
 
+        //hadoop step definitions:
+
         HadoopJarStepConfig hadoopJarStep1 = new HadoopJarStepConfig()
                 .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step1ReformatBiarcs.jar")
                 .withArgs(localAppConfiguration.getS3BucketName(), s3InputPath, "step_1_results/", Boolean.toString(DEBUG))
@@ -70,6 +72,7 @@ public class LocalApplication {
                 .withMainClass("Step7CalculateVectores");
 
 
+        // hadoop step configs:
         StepConfig stepConfig1 = new StepConfig()
                 .withName("parse biarcs")
                 .withHadoopJarStep(hadoopJarStep1)
@@ -105,6 +108,7 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep7)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
+        // run EMR job flow:
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
                 .withInstanceCount(NUM_OF_INSTANCES)
                 .withMasterInstanceType(InstanceType.M4Large.toString())

@@ -79,9 +79,9 @@ public class Step7CalculateVectors {
             // key=l value=list of <f,[assoc_freq, assoc_prob, assoc_PMI, assoc_t-test]>
             StringBuilder sb = new StringBuilder();
             for (Text value : values) {
-                sb.append(value.toString()).append("\n");
+                sb.append(value.toString()).append("\t\t");
             }
-            // emit key=l value=list of <f,[assoc_freq, assoc_prob, assoc_PMI, assoc_t-test]> (each feature separated by '\n')
+            // emit key=l value=list of <f,[assoc_freq, assoc_prob, assoc_PMI, assoc_t-test]> (each feature separated by '\t\t')
             context.write(key, new Text(sb.toString()));
         }
     }
