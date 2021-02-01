@@ -106,6 +106,7 @@ public class Step7CalculateVectors {
 
         Configuration conf = new Configuration();
         conf.set("DEBUG", Boolean.toString(debug));
+        conf.set("bucketName", s3BucketName);
 
         Job job = new Job(conf, "step7CalculateVectors");
         job.setJarByClass(Step7CalculateVectors.class);
