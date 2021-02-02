@@ -7,6 +7,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GeneralUtils {
 
@@ -65,5 +66,14 @@ public class GeneralUtils {
             gsMap.put(gsPair, Boolean.parseBoolean(gsLine[2]));
         }
         return gsMap;
+    }
+    // returns list of pairs in gsMap that contain a specific given lexeme
+    public static List<Pair<String,String>> getWordPairs(Map<Pair<String,String>, Boolean> map, String lexeme){
+        List<Pair<String,String>> result = map.keySet()
+                .stream()
+                .filter(x -> x.getFirst().equals(lexeme) || x.getSecond().equals(lexeme))
+                .collect(Collectors.toList());
+
+        return result;
     }
 }

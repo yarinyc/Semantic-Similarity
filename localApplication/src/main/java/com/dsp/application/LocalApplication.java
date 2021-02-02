@@ -6,12 +6,9 @@ import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
 import com.amazonaws.services.elasticmapreduce.model.*;
 import com.dsp.utils.GeneralUtils;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class LocalApplication {
 
@@ -69,7 +66,7 @@ public class LocalApplication {
         HadoopJarStepConfig hadoopJarStep7 = new HadoopJarStepConfig()
                 .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step7CalculateVectors.jar")
                 .withArgs(localAppConfiguration.getS3BucketName(), "step_6_results/", "step_7_results/", Boolean.toString(DEBUG))
-                .withMainClass("Step7CalculateVectores");
+                .withMainClass("Step7CalculateVectors");
 
 
         // hadoop step configs:
@@ -121,7 +118,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(/*stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6,*/ stepConfig7)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6, stepConfig7)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -144,7 +141,7 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_3_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_4_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
-//            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_7_results/");
         } catch (IOException e) {
             e.printStackTrace();
