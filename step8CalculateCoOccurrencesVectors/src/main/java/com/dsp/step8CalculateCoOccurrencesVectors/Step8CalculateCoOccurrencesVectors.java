@@ -120,33 +120,37 @@ public class Step8CalculateCoOccurrencesVectors {
                     case 0:
                         SimilarityCalculator simCalc1 = new SimilarityCalculator(firstAssocFreq , secondAssocFreq);
                         List<Double> similarityScores1 = simCalc1.getAllSimilarities();
-                        for(Double score : similarityScores1){
-                            coOccurrenceVector.add(score);
-                        }
+//                        for(Double score : similarityScores1){
+//                            coOccurrenceVector.add(score);
+//                        }
+                        coOccurrenceVector.addAll(similarityScores1);
                         break;
 
                     case 1:
                         SimilarityCalculator simCalc2 = new SimilarityCalculator(firstAssocProb , secondAssocProb);
                         List<Double> similarityScores2 = simCalc2.getAllSimilarities();
-                        for(Double score : similarityScores2){
-                            coOccurrenceVector.add(score);
-                        }
+//                        for(Double score : similarityScores2){
+//                            coOccurrenceVector.add(score);
+//                        }
+                        coOccurrenceVector.addAll(similarityScores2);
                         break;
 
                     case 2:
                         SimilarityCalculator simCalc3 = new SimilarityCalculator(firstAssocPMI , secondAssocPMI);
                         List<Double> similarityScores3 = simCalc3.getAllSimilarities();
-                        for(Double score : similarityScores3){
-                            coOccurrenceVector.add(score);
-                        }
+//                        for(Double score : similarityScores3){
+//                            coOccurrenceVector.add(score);
+//                        }
+                        coOccurrenceVector.addAll(similarityScores3);
                         break;
 
                     case 3:
                         SimilarityCalculator simCalc4 = new SimilarityCalculator(firstAssocT , secondAssocT);
                         List<Double> similarityScores4 = simCalc4.getAllSimilarities();
-                        for(Double score : similarityScores4){
-                            coOccurrenceVector.add(score);
-                        }
+//                        for(Double score : similarityScores4){
+//                            coOccurrenceVector.add(score);
+//                        }
+                        coOccurrenceVector.addAll(similarityScores4);
                         break;
                 }
             }
