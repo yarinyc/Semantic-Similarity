@@ -40,8 +40,8 @@ public class AssocCalculator {
     }
 
     //calculate assoc_freq(l, f)=count(l, f)
-    public Long getAssocFreq(){
-        return countLF;
+    public Double getAssocFreq(){
+        return (countLF / 1.0);
     }
 
     //calculate assoc_prob(l, f)=P(f|l)

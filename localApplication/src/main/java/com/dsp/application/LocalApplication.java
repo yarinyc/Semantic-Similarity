@@ -68,6 +68,11 @@ public class LocalApplication {
                 .withArgs(localAppConfiguration.getS3BucketName(), "step_6_results/", "step_7_results/", Boolean.toString(DEBUG))
                 .withMainClass("Step7CalculateVectors");
 
+        HadoopJarStepConfig hadoopJarStep8 = new HadoopJarStepConfig()
+                .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step8CalculateCoOccurrencesVectors.jar")
+                .withArgs(localAppConfiguration.getS3BucketName(), "step_7_results/", "step_8_results/", Boolean.toString(DEBUG))
+                .withMainClass("Step7CalculateVectors");
+
 
         // hadoop step configs:
         StepConfig stepConfig1 = new StepConfig()
@@ -105,6 +110,11 @@ public class LocalApplication {
                 .withHadoopJarStep(hadoopJarStep7)
                 .withActionOnFailure("TERMINATE_JOB_FLOW");
 
+        StepConfig stepConfig8 = new StepConfig()
+                .withName("calculate co-occurrence vectors")
+                .withHadoopJarStep(hadoopJarStep8)
+                .withActionOnFailure("TERMINATE_JOB_FLOW");
+
         // run EMR job flow:
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
                 .withInstanceCount(NUM_OF_INSTANCES)
@@ -118,7 +128,7 @@ public class LocalApplication {
         RunJobFlowRequest runFlowRequest = new RunJobFlowRequest()
                 .withName("dsp3-Biarcs")
                 .withInstances(instances)
-                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6, stepConfig7)
+                .withSteps(stepConfig1 , stepConfig2, stepConfig3, stepConfig4, stepConfig5, stepConfig6, stepConfig7, stepConfig8)
                 .withServiceRole(EMR_DEFAULT_ROLE)
                 .withJobFlowRole(EMR_EC2_DEFAULT_ROLE)
                 .withReleaseLabel("emr-6.2.0")
@@ -133,8 +143,8 @@ public class LocalApplication {
     private static void cleanS3Bucket(LocalAppConfiguration localAppConfiguration) {
         String bucketName = localAppConfiguration.getS3BucketName();
         try {
-            Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTL");
             Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTF");
+            Runtime.getRuntime().exec("aws s3 rm s3://"+ bucketName +"/COUNTL");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/logs/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_1_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_2_results/");
@@ -143,6 +153,7 @@ public class LocalApplication {
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_5_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_6_results/");
             Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_7_results/");
+            Runtime.getRuntime().exec("aws s3 rm --recursive s3://"+ bucketName +"/step_8_results/");
         } catch (IOException e) {
             e.printStackTrace();
         }

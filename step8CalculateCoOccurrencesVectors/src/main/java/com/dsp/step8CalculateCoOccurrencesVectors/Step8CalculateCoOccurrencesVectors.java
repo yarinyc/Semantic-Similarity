@@ -67,14 +67,14 @@ public class Step8CalculateCoOccurrencesVectors {
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
-            Map<String,Number> firstAssocFreq = new HashMap<>();
-            Map<String,Number> firstAssocProb = new HashMap<>();
-            Map<String,Number> firstAssocPMI = new HashMap<>();
-            Map<String,Number> firstAssocT = new HashMap<>();
-            Map<String,Number> secondAssocFreq = new HashMap<>();
-            Map<String,Number> secondAssocProb = new HashMap<>();
-            Map<String,Number> secondAssocPMI = new HashMap<>();
-            Map<String,Number> secondAssocT = new HashMap<>();
+            HashMap<String,Number> firstAssocFreq = new HashMap<>();
+            HashMap<String,Number> firstAssocProb = new HashMap<>();
+            HashMap<String,Number> firstAssocPMI = new HashMap<>();
+            HashMap<String,Number> firstAssocT = new HashMap<>();
+            HashMap<String,Number> secondAssocFreq = new HashMap<>();
+            HashMap<String,Number> secondAssocProb = new HashMap<>();
+            HashMap<String,Number> secondAssocPMI = new HashMap<>();
+            HashMap<String,Number> secondAssocT = new HashMap<>();
 
             String[] splitKey = key.toString().substring(1,key.toString().length()-1).split(",");
             String firstWord = splitKey[0];
@@ -91,14 +91,14 @@ public class Step8CalculateCoOccurrencesVectors {
                     String[] assocValues = featureAssocs[1].substring(1, featureAssocs[1].length() - 1).split(", ");
                     // if l is the first word in the key
                     if (lexeme.equals(firstWord)) {
-                        firstAssocFreq.put(feature,Long.parseLong(assocValues[0]));
+                        firstAssocFreq.put(feature,Double.parseDouble(assocValues[0]));
                         firstAssocProb.put(feature,Double.parseDouble(assocValues[1]));
                         firstAssocPMI.put(feature,Double.parseDouble(assocValues[2]));
                         firstAssocT.put(feature,Double.parseDouble(assocValues[3]));
                     }
                     // if l is the second word in the key
                     else if (lexeme.equals(secondWord)) {
-                        secondAssocFreq.put(feature,Long.parseLong(assocValues[0]));
+                        secondAssocFreq.put(feature,Double.parseDouble(assocValues[0]));
                         secondAssocProb.put(feature,Double.parseDouble(assocValues[1]));
                         secondAssocPMI.put(feature,Double.parseDouble(assocValues[2]));
                         secondAssocT.put(feature,Double.parseDouble(assocValues[3]));
@@ -123,6 +123,7 @@ public class Step8CalculateCoOccurrencesVectors {
 //                        for(Double score : similarityScores1){
 //                            coOccurrenceVector.add(score);
 //                        }
+                        GeneralUtils.logPrint("In step8 reduce: similarityScores1 are - " + similarityScores1.toString());
                         coOccurrenceVector.addAll(similarityScores1);
                         break;
 
@@ -132,6 +133,7 @@ public class Step8CalculateCoOccurrencesVectors {
 //                        for(Double score : similarityScores2){
 //                            coOccurrenceVector.add(score);
 //                        }
+                        GeneralUtils.logPrint("In step8 reduce: similarityScores2 are - " + similarityScores2.toString());
                         coOccurrenceVector.addAll(similarityScores2);
                         break;
 
@@ -141,6 +143,7 @@ public class Step8CalculateCoOccurrencesVectors {
 //                        for(Double score : similarityScores3){
 //                            coOccurrenceVector.add(score);
 //                        }
+                        GeneralUtils.logPrint("In step8 reduce: similarityScores3 are - " + similarityScores3.toString());
                         coOccurrenceVector.addAll(similarityScores3);
                         break;
 
@@ -150,10 +153,13 @@ public class Step8CalculateCoOccurrencesVectors {
 //                        for(Double score : similarityScores4){
 //                            coOccurrenceVector.add(score);
 //                        }
+                        GeneralUtils.logPrint("In step8 reduce: similarityScores4 are - " + similarityScores4.toString());
                         coOccurrenceVector.addAll(similarityScores4);
                         break;
                 }
             }
+
+            GeneralUtils.logPrint("In step8 reduce: final co-occurrence vector for wordPair: " + key.toString() + " is - " + coOccurrenceVector.toString());
 
             // emit key = wordPair (<l,l'>), value = 24-d coOccurrence vector
             context.write(key, new Text(coOccurrenceVector.toString()));
@@ -186,7 +192,6 @@ public class Step8CalculateCoOccurrencesVectors {
         Job job = new Job(conf, "step8CalculateCoOccurrencesVectors");
         job.setJarByClass(Step8CalculateCoOccurrencesVectors.class);
         job.setMapperClass(Step8CalculateCoOccurrencesVectors.MapperClass.class);
-        job.setCombinerClass(Step8CalculateCoOccurrencesVectors.ReducerClass.class);
         job.setPartitionerClass(Step8CalculateCoOccurrencesVectors.PartitionerClass.class);
         job.setReducerClass(Step8CalculateCoOccurrencesVectors.ReducerClass.class);
         job.setMapOutputKeyClass(Text.class);
