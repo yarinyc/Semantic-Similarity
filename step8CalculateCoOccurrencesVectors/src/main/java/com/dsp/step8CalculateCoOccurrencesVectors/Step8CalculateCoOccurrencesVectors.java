@@ -1,6 +1,7 @@
 package com.dsp.step8CalculateCoOccurrencesVectors;
 
 import com.dsp.commonResources.Pair;
+import com.dsp.commonResources.SimilarityCalculator;
 import com.dsp.utils.GeneralUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -66,14 +67,14 @@ public class Step8CalculateCoOccurrencesVectors {
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
-            Map<String,String> firstAssocFreq = new HashMap<>();
-            Map<String,String> firstAssocProb = new HashMap<>();
-            Map<String,String> firstAssocPMI = new HashMap<>();
-            Map<String,String> firstAssocT = new HashMap<>();
-            Map<String,String> secondAssocFreq = new HashMap<>();
-            Map<String,String> secondAssocProb = new HashMap<>();
-            Map<String,String> secondAssocPMI = new HashMap<>();
-            Map<String,String> secondAssocT = new HashMap<>();
+            Map<String,Number> firstAssocFreq = new HashMap<>();
+            Map<String,Number> firstAssocProb = new HashMap<>();
+            Map<String,Number> firstAssocPMI = new HashMap<>();
+            Map<String,Number> firstAssocT = new HashMap<>();
+            Map<String,Number> secondAssocFreq = new HashMap<>();
+            Map<String,Number> secondAssocProb = new HashMap<>();
+            Map<String,Number> secondAssocPMI = new HashMap<>();
+            Map<String,Number> secondAssocT = new HashMap<>();
 
             String[] splitKey = key.toString().substring(1,key.toString().length()-1).split(",");
             String firstWord = splitKey[0];
@@ -90,17 +91,17 @@ public class Step8CalculateCoOccurrencesVectors {
                     String[] assocValues = featureAssocs[1].substring(1, featureAssocs[1].length() - 1).split(", ");
                     // if l is the first word in the key
                     if (lexeme.equals(firstWord)) {
-                        firstAssocFreq.put(feature,assocValues[0]);
-                        firstAssocProb.put(feature,assocValues[1]);
-                        firstAssocPMI.put(feature,assocValues[2]);
-                        firstAssocT.put(feature,assocValues[3]);
+                        firstAssocFreq.put(feature,Long.parseLong(assocValues[0]));
+                        firstAssocProb.put(feature,Double.parseDouble(assocValues[1]));
+                        firstAssocPMI.put(feature,Double.parseDouble(assocValues[2]));
+                        firstAssocT.put(feature,Double.parseDouble(assocValues[3]));
                     }
                     // if l is the second word in the key
                     else if (lexeme.equals(secondWord)) {
-                        secondAssocFreq.put(feature,assocValues[0]);
-                        secondAssocProb.put(feature,assocValues[1]);
-                        secondAssocPMI.put(feature,assocValues[2]);
-                        secondAssocT.put(feature,assocValues[3]);
+                        secondAssocFreq.put(feature,Long.parseLong(assocValues[0]));
+                        secondAssocProb.put(feature,Double.parseDouble(assocValues[1]));
+                        secondAssocPMI.put(feature,Double.parseDouble(assocValues[2]));
+                        secondAssocT.put(feature,Double.parseDouble(assocValues[3]));
                     }
                     // this should not happen
                     else {
@@ -109,9 +110,49 @@ public class Step8CalculateCoOccurrencesVectors {
                 }
             }
 
-            // compute 24-d co-occurrence vector and emit under original key
+            // compute 24-d co-occurrence vector
+            List<Double> coOccurrenceVector = new ArrayList<>();
 
+            for(int i=0; i<4; i++){
 
+                // switch case for each of the 4 association with context vector (vectors represented as hashmaps)
+                switch(i){
+                    case 0:
+                        SimilarityCalculator simCalc1 = new SimilarityCalculator(firstAssocFreq , secondAssocFreq);
+                        List<Double> similarityScores1 = simCalc1.getAllSimilarities();
+                        for(Double score : similarityScores1){
+                            coOccurrenceVector.add(score);
+                        }
+                        break;
+
+                    case 1:
+                        SimilarityCalculator simCalc2 = new SimilarityCalculator(firstAssocProb , secondAssocProb);
+                        List<Double> similarityScores2 = simCalc2.getAllSimilarities();
+                        for(Double score : similarityScores2){
+                            coOccurrenceVector.add(score);
+                        }
+                        break;
+
+                    case 2:
+                        SimilarityCalculator simCalc3 = new SimilarityCalculator(firstAssocPMI , secondAssocPMI);
+                        List<Double> similarityScores3 = simCalc3.getAllSimilarities();
+                        for(Double score : similarityScores3){
+                            coOccurrenceVector.add(score);
+                        }
+                        break;
+
+                    case 3:
+                        SimilarityCalculator simCalc4 = new SimilarityCalculator(firstAssocT , secondAssocT);
+                        List<Double> similarityScores4 = simCalc4.getAllSimilarities();
+                        for(Double score : similarityScores4){
+                            coOccurrenceVector.add(score);
+                        }
+                        break;
+                }
+            }
+
+            // emit key = wordPair (<l,l'>), value = 24-d coOccurrence vector
+            context.write(key, new Text(coOccurrenceVector.toString()));
 
         }
     }
