@@ -70,8 +70,10 @@ public class GeneralUtils {
 
     // returns list of pairs in gsMap that contain a specific given lexeme
     public static List<Pair<String,String>> getWordPairs(Map<Pair<String,String>, Boolean> map, String lexeme){
+        Stemmer stemmer = new Stemmer();
         List<Pair<String,String>> result = map.keySet()
                 .stream()
+                .map(p -> Pair.of(stem(p.getFirst(), stemmer), stem(p.getSecond(), stemmer)))
                 .filter(x -> x.getFirst().equals(lexeme) || x.getSecond().equals(lexeme))
                 .collect(Collectors.toList());
 

@@ -79,6 +79,8 @@ public class Step8CalculateCoOccurrencesVectors {
             String[] splitKey = key.toString().substring(1,key.toString().length()-1).split(",");
             String firstWord = splitKey[0];
             String secondWord = splitKey[1];
+            GeneralUtils.logPrint("In reduce step 8: l1 = "+ firstWord + " l2 = " + secondWord);
+
 
             // values should be of size 2: all features of first word + all features of second word
             for(Text value : values){
@@ -105,7 +107,7 @@ public class Step8CalculateCoOccurrencesVectors {
                     }
                     // this should not happen
                     else {
-                        GeneralUtils.logPrint("In reduce step 8: key is " + key.toString() + " and lexeme is: " + lexeme);
+                        GeneralUtils.logPrint("In reduce step 8 ERROR: key is " + key.toString() + " and lexeme is: " + lexeme);
                     }
                 }
             }
@@ -113,51 +115,30 @@ public class Step8CalculateCoOccurrencesVectors {
             // compute 24-d co-occurrence vector
             List<Double> coOccurrenceVector = new ArrayList<>();
 
-            for(int i=0; i<4; i++){
+            // for each of the 4 association with context vector calculate similarities (vectors represented as hashmaps)
+            //sim1:
+            SimilarityCalculator simCalc1 = new SimilarityCalculator(firstAssocFreq , secondAssocFreq);
+            List<Double> similarityScores1 = simCalc1.getAllSimilarities();
+            GeneralUtils.logPrint("In step8 reduce: key = " + key.toString() + " similarityScores1 are - " + similarityScores1.toString());
+            coOccurrenceVector.addAll(similarityScores1);
 
-                // switch case for each of the 4 association with context vector (vectors represented as hashmaps)
-                switch(i){
-                    case 0:
-                        SimilarityCalculator simCalc1 = new SimilarityCalculator(firstAssocFreq , secondAssocFreq);
-                        List<Double> similarityScores1 = simCalc1.getAllSimilarities();
-//                        for(Double score : similarityScores1){
-//                            coOccurrenceVector.add(score);
-//                        }
-                        GeneralUtils.logPrint("In step8 reduce: similarityScores1 are - " + similarityScores1.toString());
-                        coOccurrenceVector.addAll(similarityScores1);
-                        break;
+            //sim2:
+            SimilarityCalculator simCalc2 = new SimilarityCalculator(firstAssocProb , secondAssocProb);
+            List<Double> similarityScores2 = simCalc2.getAllSimilarities();
+            GeneralUtils.logPrint("In step8 reduce: key = " + key.toString() + " similarityScores2 are - " + similarityScores2.toString());
+            coOccurrenceVector.addAll(similarityScores2);
 
-                    case 1:
-                        SimilarityCalculator simCalc2 = new SimilarityCalculator(firstAssocProb , secondAssocProb);
-                        List<Double> similarityScores2 = simCalc2.getAllSimilarities();
-//                        for(Double score : similarityScores2){
-//                            coOccurrenceVector.add(score);
-//                        }
-                        GeneralUtils.logPrint("In step8 reduce: similarityScores2 are - " + similarityScores2.toString());
-                        coOccurrenceVector.addAll(similarityScores2);
-                        break;
+            //sim3:
+            SimilarityCalculator simCalc3 = new SimilarityCalculator(firstAssocPMI , secondAssocPMI);
+            List<Double> similarityScores3 = simCalc3.getAllSimilarities();
+            GeneralUtils.logPrint("In step8 reduce: key = " + key.toString() + " similarityScores3 are - " + similarityScores3.toString());
+            coOccurrenceVector.addAll(similarityScores3);
 
-                    case 2:
-                        SimilarityCalculator simCalc3 = new SimilarityCalculator(firstAssocPMI , secondAssocPMI);
-                        List<Double> similarityScores3 = simCalc3.getAllSimilarities();
-//                        for(Double score : similarityScores3){
-//                            coOccurrenceVector.add(score);
-//                        }
-                        GeneralUtils.logPrint("In step8 reduce: similarityScores3 are - " + similarityScores3.toString());
-                        coOccurrenceVector.addAll(similarityScores3);
-                        break;
-
-                    case 3:
-                        SimilarityCalculator simCalc4 = new SimilarityCalculator(firstAssocT , secondAssocT);
-                        List<Double> similarityScores4 = simCalc4.getAllSimilarities();
-//                        for(Double score : similarityScores4){
-//                            coOccurrenceVector.add(score);
-//                        }
-                        GeneralUtils.logPrint("In step8 reduce: similarityScores4 are - " + similarityScores4.toString());
-                        coOccurrenceVector.addAll(similarityScores4);
-                        break;
-                }
-            }
+            //sim4:
+            SimilarityCalculator simCalc4 = new SimilarityCalculator(firstAssocT , secondAssocT);
+            List<Double> similarityScores4 = simCalc4.getAllSimilarities();
+            GeneralUtils.logPrint("In step8 reduce: key = " + key.toString() + " similarityScores4 are - " + similarityScores4.toString());
+            coOccurrenceVector.addAll(similarityScores4);
 
             GeneralUtils.logPrint("In step8 reduce: final co-occurrence vector for wordPair: " + key.toString() + " is - " + coOccurrenceVector.toString());
 
@@ -200,7 +181,6 @@ public class Step8CalculateCoOccurrencesVectors {
         job.setOutputValueClass(Text.class);
 
         job.setInputFormatClass(SequenceFileInputFormat.class);
-//        job.setOutputFormatClass(SequenceFileOutputFormat.class);
         job.setOutputFormatClass(TextOutputFormat.class);
 
         Path inputPath = new Path(s3BucketUrl+input);
