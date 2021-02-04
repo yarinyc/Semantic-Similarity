@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/DSP3.iml" filepath="$PROJECT_DIR$/.idea/DSP3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/localApplication/localApplication.iml" filepath="$PROJECT_DIR$/localApplication/localApplication.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" filepath="$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step2CountLexemesFeatures/step2CountLexemesFeatures.iml" filepath="$PROJECT_DIR$/step2CountLexemesFeatures/step2CountLexemesFeatures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" filepath="$PROJECT_DIR$/step3CountFeatures/step3CountFeatures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" filepath="$PROJECT_DIR$/step4CountLexemes/step4CountLexemes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step5Join1/step5Join1.iml" filepath="$PROJECT_DIR$/step5Join1/step5Join1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step6Join2/step6Join2.iml" filepath="$PROJECT_DIR$/step6Join2/step6Join2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step7CalculateVectors/step7CalculateVectors.iml" filepath="$PROJECT_DIR$/step7CalculateVectors/step7CalculateVectors.iml" />
+      <module fileurl="file://$PROJECT_DIR$/step8CalculateCoOccurrencesVectors/step8CalculateCoOccurrencesVectors.iml" filepath="$PROJECT_DIR$/step8CalculateCoOccurrencesVectors/step8CalculateCoOccurrencesVectors.iml" />
+    </modules>
+  </component>
+</project>
