@@ -67,14 +67,14 @@ public class Step8CalculateCoOccurrencesVectors {
 
         @Override
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException,  InterruptedException {
-            HashMap<String,Number> firstAssocFreq = new HashMap<>();
-            HashMap<String,Number> firstAssocProb = new HashMap<>();
-            HashMap<String,Number> firstAssocPMI = new HashMap<>();
-            HashMap<String,Number> firstAssocT = new HashMap<>();
-            HashMap<String,Number> secondAssocFreq = new HashMap<>();
-            HashMap<String,Number> secondAssocProb = new HashMap<>();
-            HashMap<String,Number> secondAssocPMI = new HashMap<>();
-            HashMap<String,Number> secondAssocT = new HashMap<>();
+            HashMap<String,Double> firstAssocFreq = new HashMap<>();
+            HashMap<String,Double> firstAssocProb = new HashMap<>();
+            HashMap<String,Double> firstAssocPMI = new HashMap<>();
+            HashMap<String,Double> firstAssocT = new HashMap<>();
+            HashMap<String,Double> secondAssocFreq = new HashMap<>();
+            HashMap<String,Double> secondAssocProb = new HashMap<>();
+            HashMap<String,Double> secondAssocPMI = new HashMap<>();
+            HashMap<String,Double> secondAssocT = new HashMap<>();
 
             String[] splitKey = key.toString().substring(1,key.toString().length()-1).split(",");
             String firstWord = splitKey[0];

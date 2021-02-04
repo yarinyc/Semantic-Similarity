@@ -1,18 +1,20 @@
 package com.dsp.commonResources;
 
+import com.dsp.utils.GeneralUtils;
+
 import java.util.*;
 
 
 public class SimilarityCalculator {
 
-    private HashMap<String,Number> vector1;
-    private HashMap<String,Number> vector2;
+    private HashMap<String,Double> vector1;
+    private HashMap<String,Double> vector2;
 //    private Set<String> intersectionSet; // keys (features) both in vector1 and vector2
     private HashSet<String> unionSet; // all possible keys (features)
 //    private Set<String> vector1DifferenceSet; // keys (features) in vector1 that are not in vector2
 //    private Set<String> vector2DifferenceSet; // keys (features) in vector2 that are not in vector1
 
-    public SimilarityCalculator(HashMap<String,Number> vector1, HashMap<String,Number> vector2) {
+    public SimilarityCalculator(HashMap<String,Double> vector1, HashMap<String,Double> vector2) {
         this.vector1 = vector1;
         this.vector2 = vector2;
         // compute relevant feature sets
@@ -43,7 +45,7 @@ public class SimilarityCalculator {
 //        }
 
         for(String feature : unionSet){
-            similarity += Math.abs(vector1.getOrDefault(feature,0.0).doubleValue() - vector2.getOrDefault(feature,0.0).doubleValue());
+            similarity += Math.abs(vector1.getOrDefault(feature, 0.0) - vector2.getOrDefault(feature, 0.0));
         }
 
         return similarity;
@@ -66,7 +68,7 @@ public class SimilarityCalculator {
 //        }
 
         for(String feature : unionSet){
-            similarity += Math.pow((vector1.getOrDefault(feature,0.0).doubleValue() - vector2.getOrDefault(feature,0.0).doubleValue()), 2.0);
+            similarity += Math.pow((vector1.getOrDefault(feature, 0.0) - vector2.getOrDefault(feature, 0.0)), 2.0);
         }
 
         return Math.sqrt(similarity);
@@ -79,18 +81,20 @@ public class SimilarityCalculator {
         double denominatorTerm2 = 0.0;
 
         for(String feature : unionSet){
-            numerator += (vector1.getOrDefault(feature,0.0).doubleValue() * vector2.getOrDefault(feature,0.0).doubleValue());
+            numerator += (vector1.getOrDefault(feature, 0.0) * vector2.getOrDefault(feature, 0.0));
         }
 
         for(String feature : vector1.keySet()){
-            denominatorTerm1 += Math.pow(vector1.get(feature).doubleValue(), 2.0);
+            denominatorTerm1 += Math.pow(vector1.get(feature), 2.0);
         }
 
         for(String feature : vector2.keySet()){
-            denominatorTerm2 += Math.pow(vector2.get(feature).doubleValue(), 2.0);
+            denominatorTerm2 += Math.pow(vector2.get(feature), 2.0);
         }
 
         double denominator = Math.sqrt(denominatorTerm1) * Math.sqrt(denominatorTerm2);
+
+        GeneralUtils.logPrint("Cosine: den1 = " + denominatorTerm1 + " den2 = " + denominatorTerm2 + " final den = " + denominator);
 
         return numerator/denominator;
     }
@@ -116,8 +120,8 @@ public class SimilarityCalculator {
 //        }
 
         for(String feature : unionSet){
-            numerator += Math.min(vector1.getOrDefault(feature,0.0).doubleValue(), vector2.getOrDefault(feature,0.0).doubleValue());
-            denominator += Math.max(vector1.getOrDefault(feature,0.0).doubleValue(), vector2.getOrDefault(feature,0.0).doubleValue());
+            numerator += Math.min(vector1.getOrDefault(feature, 0.0), vector2.getOrDefault(feature, 0.0));
+            denominator += Math.max(vector1.getOrDefault(feature, 0.0), vector2.getOrDefault(feature, 0.0));
         }
 
         return numerator/denominator;
@@ -129,12 +133,12 @@ public class SimilarityCalculator {
         double denominator = 0.0;
 
         for(String feature : unionSet){
-            numerator += Math.min(vector1.getOrDefault(feature,0.0).doubleValue(), vector2.getOrDefault(feature,0.0).doubleValue());
+            numerator += Math.min(vector1.getOrDefault(feature, 0.0), vector2.getOrDefault(feature, 0.0));
         }
         numerator *= 2.0;
 
         for(String feature : unionSet){
-            denominator +=  (vector1.getOrDefault(feature,0.0).doubleValue() + vector2.getOrDefault(feature,0.0).doubleValue());
+            denominator +=  (vector1.getOrDefault(feature, 0.0) + vector2.getOrDefault(feature, 0.0));
         }
 
         return numerator/denominator;
@@ -151,8 +155,10 @@ public class SimilarityCalculator {
 
         if(firstVectorFlag == 1) {
             for (String feature : unionSet) {
-                double Px = vector1.getOrDefault(feature, 0.0).doubleValue();
-                double Qx = (Px + vector2.getOrDefault(feature, 0.0).doubleValue()) / 2.0;
+                double Px = vector1.getOrDefault(feature, 0.0);
+                double Qx = (Px + vector2.getOrDefault(feature, 0.0)) / 2.0;
+
+                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx);
 //                if (Qx == 0.0) {
 //                    Qx = 1.0;
 //                }
@@ -164,8 +170,10 @@ public class SimilarityCalculator {
 
         else{
             for (String feature : unionSet) {
-                double Px = vector2.getOrDefault(feature, 0.0).doubleValue();
-                double Qx = (Px + vector1.getOrDefault(feature, 0.0).doubleValue()) / 2.0;
+                double Px = vector2.getOrDefault(feature, 0.0);
+                double Qx = (Px + vector1.getOrDefault(feature, 0.0)) / 2.0;
+
+                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx);
 //                if (Qx == 0.0) {
 //                    Qx = 1.0;
 //                }
