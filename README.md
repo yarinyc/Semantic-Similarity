@@ -11,12 +11,16 @@ EMR configuration:
 
 **How to run the project:**
     
-    1) Add your bucketName (bucket should already exist) and ec2 keypair to the config file (first row - bucket name, second row - keypair) 
+    1) Add to the config file:
+        - your bucketName (bucket should already exist)
+        - EC2 keypair
+        - S3 path to the input
     2) Run mvn clean install
-    3) Upload all jars (except for localApplication.jar) to the s3 URI: s3://**YOUR_BUCKET_NAME**/jars/
-    4) In the terminal run: java -jar localApplication.jar
+    3) Upload all jars (except for localApplication.jar) to the s3 URI: s3://${YOUR_BUCKET_NAME}/jars/
+    4) In the terminal run: java -jar localApplication.jar: this will run the map reduce flow
     5) To view the mapReduce process, refer to the aws EMR console 
-    6) Final result files will be saved to the s3 URI: s3://**YOUR_BUCKET_NAME**/step_8_sort_results/ in text format
+    6) Final map reduce result files will be saved to the s3 URI: s3://**YOUR_BUCKET_NAME**/step_8_results/ in text format
+    7) run WekaClassifier in order to train the model in the data from s3://**YOUR_BUCKET_NAME**/step_8_results/
 
 **Running times and statistics:**
 
@@ -106,3 +110,8 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
                 * calculate for each type of similarity formula its value: sim_js, sim_dice etc. (we will have 6 different values per assoc type, 24 in total)
                 * in total we will have 24 different values. (coordinate PMI-JS=val1, PMI-dice=val2, etc.)
                 emit key=<l1,l2>, value=GS_vector of size 24
+
+*Weka Classifier*
+
+
+

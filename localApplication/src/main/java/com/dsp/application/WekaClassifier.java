@@ -1,12 +1,7 @@
 package com.dsp.application;
 
-import com.dsp.commonResources.Pair;
 import com.dsp.utils.GeneralUtils;
 import com.dsp.utils.Stemmer;
-import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.fs.FSDataInputStream;
-import weka.core.Instances;
-import weka.core.converters.CSVLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,33 +12,100 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.evaluation.ConfusionMatrix;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 public class WekaClassifier {
 
-    public static final boolean SHOULD_CREATE_CSV = true;
-    public static final String COLUMNS = "word1,word2,label," +
+    public static final String CSV_HEADER = "word1,word2,label," +
             "freq-manhattan,freq-euclidean,freq-cosine,freq-Jacard,freq-Dice,freq-JS," +
             "prob-manhattan,prob-euclidean,prob-cosine,prob-Jacard,prob-Dice,prob-JS," +
             "PMI-manhattan,PMI-euclidean,PMI-cosine,PMI-Jacard,PMI-Dice,PMI-JS," +
-            "t-test-manhattan,t-test-euclidean,t-test-cosine,t-test-Jacard,t-test-Dice,t-test-JS,";
+            "T-test-manhattan,T-test-euclidean,T-test-cosine,T-test-Jacard,T-test-Dice,T-test-JS,";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
         String dataCSVFileName = Paths.get("resources", "data.csv").toString();
+        String dataARFFileName = Paths.get("resources", "data.arff").toString();
         String rawDataFileName = Paths.get("resources", "part-r-00000").toString();
-        if(SHOULD_CREATE_CSV){
-            convertDataToCSV(dataCSVFileName, rawDataFileName);
-            GeneralUtils.print("data.csv file was created successfully");
+
+        // TODO maybe add function for downloading the data from s3 to ./resources/ directory
+
+        if(!new File(dataARFFileName).exists()){ // create the data files (data.csv & data.arff) only if they don't exist
+            prepareData(dataCSVFileName, dataARFFileName, rawDataFileName);
         }
 
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ load data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//        CSVLoader loader = new CSVLoader();
-//        loader.setFieldSeparator(",");
-//        loader.setSource(new File(fileName));
-//        Instances instances = loader.getDataSet();
-//
-//
-//        System.out.println(instances);
+        DataSource source = new DataSource(dataARFFileName);
+        Instances instances = source.getDataSet();
 
+        // print instances before training the model
+        System.out.println(instances.toSummaryString());
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ configure data parameters ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // TODO: probably target variable is the label: true/false ||| do we need this? what is the purpose of a class index
+        instances.setClassIndex(2); // index of the target variable - 3rd column is the label
+        instances.randomize(new Random(23)); // randomize order of input records
+
+        // assign training size and testing size for the classifier
+        int trainSize = (int) Math.round(instances.numInstances() * 0.9); // take 90% as training data
+        int testSize = instances.numInstances() - trainSize;
+
+        // instantiate training & test instances
+        Instances trainInstances = new Instances(instances, 0, trainSize);
+        Instances testInstances = new Instances(instances, trainSize, testSize);
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        NaiveBayes classifier = new NaiveBayes();
+        //MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
+        classifier.buildClassifier(trainInstances);
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ evaluate model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // use test data to evaluate model
+        Evaluation evaluation = new Evaluation(testInstances);
+        // evaluation.evaluateModel(naiveBayes, testInstances); // normal evaluation
+        evaluation.crossValidateModel(classifier, testInstances, 10, new Random(23)); // 10-fold cross-validation TODO make sure this is correct
+        System.out.println(evaluation.toSummaryString());
+
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        // a quick overview of the actual classes from our test data versus the predicted values from our model
+        ConfusionMatrix confusionMatrix = new ConfusionMatrix(new String[] {"False", "True"});
+        confusionMatrix.addPredictions(evaluation.predictions());
+
+        System.out.println(confusionMatrix.toString());
+
+        System.out.println("Accuracy: " + evaluation.pctCorrect());
+        System.out.println("Precision: " + evaluation.precision(1));
+        System.out.println("Recall: " + evaluation.recall(1));
+
+    }
+
+    // convert data from the map reduce flow to csv format and then convert it into .arff format for Weka
+    private static void prepareData(String dataCSVFileName, String dataARFFileName, String rawDataFileName) throws IOException {
+        convertDataToCSV(dataCSVFileName, rawDataFileName);
+        GeneralUtils.print("data.csv file was created successfully");
+        CSVLoader loader = new CSVLoader();
+        loader.setFieldSeparator(",");
+        loader.setSource(new File(dataCSVFileName));
+        Instances data = loader.getDataSet();
+
+        GeneralUtils.print("converting data.csv to .arff format...");
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(data);
+        saver.setFile(new File(dataARFFileName));
+        saver.writeBatch();
+        GeneralUtils.print("data.arff file was created successfully");
     }
 
     private static void convertDataToCSV(String dataCSVFileName, String rawDataFileName) {
@@ -55,7 +117,7 @@ public class WekaClassifier {
                 System.out.println("Error: failed to create the data.csv file");
                 System.exit(1);
             }
-            Files.write(Paths.get(dataCSVFileName), COLUMNS.getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(dataCSVFileName), CSV_HEADER.getBytes(), StandardOpenOption.APPEND);
 
             List<String> lines = Files.readAllLines(Paths.get(rawDataFileName), StandardCharsets.UTF_8);
             for(String line : lines){
@@ -108,6 +170,7 @@ public class WekaClassifier {
         Files.write(Paths.get(dataCSVFileName), nextLine.toString().getBytes(), StandardOpenOption.APPEND);
     }
 
+    // return a list of all lines in the GS, each line is represented by an array of size 3
     public static List<String[]> parseGoldenStandard(String fileName) throws IOException {
         return Files.readAllLines(Paths.get(fileName), StandardCharsets.UTF_8) //read from gold standard file
                 .stream()
