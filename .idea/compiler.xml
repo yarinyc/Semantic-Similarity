@@ -19,7 +19,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="DSP3" target="1.8" />
+      <module name="dsp3" target="1.8" />
       <module name="localApplication" target="1.8" />
       <module name="parent" target="8" />
       <module name="step1ReformatBiarcs" target="1.8" />

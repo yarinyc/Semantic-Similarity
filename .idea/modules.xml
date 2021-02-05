@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/DSP3.iml" filepath="$PROJECT_DIR$/.idea/DSP3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dsp3.iml" filepath="$PROJECT_DIR$/dsp3.iml" />
       <module fileurl="file://$PROJECT_DIR$/localApplication/localApplication.iml" filepath="$PROJECT_DIR$/localApplication/localApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
       <module fileurl="file://$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" filepath="$PROJECT_DIR$/step1ReformatBiarcs/step1ReformatBiarcs.iml" />
