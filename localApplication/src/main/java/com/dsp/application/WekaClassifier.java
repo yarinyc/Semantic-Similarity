@@ -86,7 +86,7 @@ public class WekaClassifier {
         System.out.println(confusionMatrix.toString());
 
         System.out.println("Accuracy: " + evaluation.pctCorrect());
-        System.out.println("Precision: " + evaluation.precision(1));
+        System.out.println("Precision: " + evaluation.precision(1)); // TODO check what is this class index
         System.out.println("Recall: " + evaluation.recall(1));
 
     }
