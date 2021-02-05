@@ -66,7 +66,12 @@ public class WekaClassifier {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         NaiveBayes classifier = new NaiveBayes();
-        //MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
+        /*MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
+        classifier.setLearningRate(0.1);
+        classifier.setMomentum(0.2);
+        classifier.setTrainingTime(5);
+        classifier.setHiddenLayers("3");*/
+
         classifier.buildClassifier(trainInstances);
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ evaluate model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
