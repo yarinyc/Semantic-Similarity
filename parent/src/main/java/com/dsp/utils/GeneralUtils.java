@@ -31,7 +31,7 @@ public class GeneralUtils {
 
     public static void print(String message){
         String s = String.format("%s - %s", new Date().toString(), message);
-        System.err.println(s);
+        System.out.println(s);
     }
 
     // parse string coded (comma separated) pairs : VAL1,VAL2
