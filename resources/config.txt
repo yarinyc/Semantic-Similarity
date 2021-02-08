@@ -1,3 +1,3 @@
-s3bucket-d797b2f9e96963c2
+s3bucket-d797b2f9e96963c1
 ec2key_dsp1
-s3://s3bucket-d797b2f9e96963c2/input/test_input_dsp3.txt
+s3://assignment3dsp/biarcs/biarcs.00-of-99

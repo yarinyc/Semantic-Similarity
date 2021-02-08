@@ -12,17 +12,40 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Step1ReformatBiarcs {
 
     public static class MapperClass extends Mapper<LongWritable, Text, Text, Biarc> {
 
         public Stemmer stemmer = new Stemmer();
+
+        // auxiliary function to make sure we biarcs with legal dependencies only
+        public boolean checkBiarcValidity(List<String> dependencyIndices, String biarcWords) {
+            if(dependencyIndices.size() != biarcWords.split("\t").length){
+                return false;
+            }
+            for(String s : dependencyIndices){
+                if(s.isEmpty()){
+                    return false;
+                }
+                else{
+                    for(char c :  s.toCharArray()){
+                        if(c < 48 || c > 57){ // if dependency is not a number
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
 
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
@@ -35,9 +58,16 @@ public class Step1ReformatBiarcs {
         // emit key=rootLexeme, value = Biarc object
         @Override
         public void map(LongWritable lineID, Text line, Context context) throws IOException,  InterruptedException {
+
+//            GeneralUtils.logPrint(lineID.toString() + "\t" + line.toString());
+
             Biarc inputBiarc = Biarc.parseBiarc(line.toString() ,stemmer);
-            GeneralUtils.logPrint("In step1 map: lexeme " + lineID + " Biarc = " + inputBiarc.toString());
-            context.write(inputBiarc.getRootLexeme(), inputBiarc);
+
+//            GeneralUtils.logPrint("In step1 map: lexeme " + lineID + " Biarc = " + inputBiarc.toString());
+            GeneralUtils.logPrint("In step1 map: line id = " + lineID + " input line = " + line.toString());
+            if(checkBiarcValidity(inputBiarc.getDependencies(), inputBiarc.getBiarcWords().toString())) { //check biarc dependencies are valid
+                context.write(inputBiarc.getRootLexeme(), inputBiarc);
+            }
         }
     }
 
@@ -89,7 +119,7 @@ public class Step1ReformatBiarcs {
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Biarc.class);
 
-        job.setInputFormatClass(TextInputFormat.class);
+        job.setInputFormatClass(SequenceFileInputFormat.class);
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
         Path inputPath = new Path(input);

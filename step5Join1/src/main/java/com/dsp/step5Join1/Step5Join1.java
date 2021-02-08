@@ -66,7 +66,7 @@ public class Step5Join1 {
                     countL = splitValue[1];
                 }
                 //if the value is of tag "LF", i.e it is of count(F=f,L=l)
-                else{
+                else if(!countL.equals("dummy-value")){
                     //emit key = <l,f>, value=<count(F=f,L=l),count(L=l)>
                     String newKey = splitValue[1]; //<lexeme,feature>
                     String countLF = splitValue[2];

@@ -21,10 +21,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
 
 public class Step3CountFeatures {
 
     public static class MapperClass extends Mapper<Text, LongWritable, Text, LongWritable> {
+
+        // auxiliary function to make sure we all keys are of <l,f> structure
+        public boolean checkPairValidity(String key) {
+           String[] spiltKey = key.split(",");
+           if(spiltKey.length !=2 || spiltKey[0].isEmpty() || spiltKey[1].isEmpty()){
+               return false;
+           }
+           return true;
+        }
 
         @Override
         public void setup(Context context) throws IOException, InterruptedException {
@@ -35,9 +45,11 @@ public class Step3CountFeatures {
         // for each <lexeme,feature> pair, emit feature with it's count
         @Override
         public void map(Text key, LongWritable value, Context context) throws IOException,  InterruptedException {
-            String[] lexemeFeaturePair = GeneralUtils.parsePair(key.toString());
-            GeneralUtils.logPrint("In step3 map: feature = " + lexemeFeaturePair[1] + " count = " + value);
-            context.write(new Text(lexemeFeaturePair[1]), value);
+            if(checkPairValidity(key.toString())) {
+                String[] lexemeFeaturePair = GeneralUtils.parsePair(key.toString());
+                GeneralUtils.logPrint("In step3 map: feature = " + lexemeFeaturePair[1] + " count = " + value);
+                context.write(new Text(lexemeFeaturePair[1]), value);
+            }
         }
     }
 
