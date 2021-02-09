@@ -1,3 +1,3 @@
-s3bucket-d797b2f9e96963c1
+s3bucket-d797b2f9e96963c2
 ec2key_dsp1
-s3://assignment3dsp/biarcs/biarcs.00-of-99
+s3://assignment3dsp/biarcs/biarcs.00-of-99,s3://assignment3dsp/biarcs/biarcs.01-of-99,s3://assignment3dsp/biarcs/biarcs.02-of-99,s3://assignment3dsp/biarcs/biarcs.03-of-99,s3://assignment3dsp/biarcs/biarcs.04-of-99,s3://assignment3dsp/biarcs/biarcs.05-of-99,s3://assignment3dsp/biarcs/biarcs.06-of-99,s3://assignment3dsp/biarcs/biarcs.07-of-99,s3://assignment3dsp/biarcs/biarcs.08-of-99,s3://assignment3dsp/biarcs/biarcs.09-of-99,s3://assignment3dsp/biarcs/biarcs.10-of-99,s3://assignment3dsp/biarcs/biarcs.11-of-99,s3://assignment3dsp/biarcs/biarcs.12-of-99,s3://assignment3dsp/biarcs/biarcs.13-of-99,s3://assignment3dsp/biarcs/biarcs.14-of-99

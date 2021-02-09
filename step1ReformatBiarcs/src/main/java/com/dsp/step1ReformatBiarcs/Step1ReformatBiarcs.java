@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -100,6 +101,7 @@ public class Step1ReformatBiarcs {
         String s3BucketName = args[1];
         String s3BucketUrl = String.format("s3://%s/", s3BucketName);
         String input = args[2];
+        String[] inputFiles = input.split(",");
         String output = args[3];
 
         // set debug flag for logging
@@ -123,7 +125,13 @@ public class Step1ReformatBiarcs {
         job.setOutputFormatClass(SequenceFileOutputFormat.class);
 
         Path inputPath = new Path(input);
-        FileInputFormat.addInputPath(job, inputPath);
+
+//        FileInputFormat.addInputPath(job, inputPath);
+        for(String in : inputFiles) {
+            MultipleInputs.addInputPath(job, new Path(in), SequenceFileInputFormat.class, Step1ReformatBiarcs.MapperClass.class);
+        }
+
+
         FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output)); // "step_1_results/"
 
         boolean isDone = job.waitForCompletion(true);
