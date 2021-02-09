@@ -5,10 +5,8 @@ import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClientBuilder;
 import com.amazonaws.services.elasticmapreduce.model.*;
-import com.dsp.utils.GeneralUtils;
 
 import java.io.IOException;
-import java.util.*;
 
 public class LocalApplication {
 
