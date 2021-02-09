@@ -20,6 +20,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Step8CalculateCoOccurrencesVectors {
 
@@ -84,11 +85,11 @@ public class Step8CalculateCoOccurrencesVectors {
 
             // values should be of size 2: all features of first word + all features of second word
             for(Text value : values){
-                String[] splitValue = value.toString().split("\t\t");
-                String lexeme = splitValue[0];
+                List<String> splitValue = Arrays.stream(value.toString().split("\t\t")).filter(x -> !x.isEmpty()).collect(Collectors.toList());
+                String lexeme = splitValue.get(0);
                 // for each feature in value, assign assoc values of feature to hashmaps, according to the lexeme (l or l' of the key <l,l'> or <l',l>)
-                for(int i=1; i<splitValue.length; i++) {
-                    String[] featureAssocs = splitValue[i].split("\t");
+                for(int i=1; i<splitValue.size(); i++) {
+                    String[] featureAssocs = splitValue.get(i).split("\t");
                     String feature = featureAssocs[0];
                     String[] assocValues = featureAssocs[1].substring(1, featureAssocs[1].length() - 1).split(", ");
                     // if l is the first word in the key

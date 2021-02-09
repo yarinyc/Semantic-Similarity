@@ -90,7 +90,7 @@ public class Step6Join2 {
                     countF = splitValue[1];
                 }
                 //if the value is of tag "LF", i.e it is of <count(F=f,L=l),count(L=l)>
-                else{
+                else if(!countF.equals("dummy-value")){
                     String newKey = splitValue[1]; // <lexeme,feature>
                     String countLF = splitValue[2];
                     String countL = splitValue[3];

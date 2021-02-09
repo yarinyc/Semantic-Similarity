@@ -16,6 +16,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class Step2CountLexemesFeatures {
@@ -37,11 +38,12 @@ public class Step2CountLexemesFeatures {
             List<String> features = value.getFeatures();
             LongWritable count = value.getTotalCount();
 
-            //for each word in biarc + all it's features in the biarc, emit the biarc count
+            // for each word in biarc + all it's features in the biarc, emit the biarc count
             // key = <lexeme,feature> (<stemmed word in biarc,feature>), value = count
             for(int i=0; i<biarcWords.length; i++){
                 int dependencyIndex = Integer.parseInt(dependencies.get(i)) - 1;
-                if(dependencyIndex != -1) {
+                GeneralUtils.logPrint("biarcWords =  " + Arrays.toString(biarcWords) + "\tdependencies = " + dependencies.toString() + "\tdependency Index = " + dependencyIndex);
+                if((dependencyIndex != -1) && (dependencyIndex < biarcWords.length)) {
                     String lexeme = biarcWords[dependencyIndex];
                     String feature = features.get(i);
 
