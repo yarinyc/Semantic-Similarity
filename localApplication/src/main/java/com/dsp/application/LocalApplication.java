@@ -15,7 +15,7 @@ public class LocalApplication {
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
     private final static int NUM_OF_INSTANCES = 8;
     private final static boolean DELETE_OUTPUTS = true;
-    private final static boolean DEBUG = true;
+    private final static boolean DEBUG = false;
 
     public static void main(String[] args){
 
@@ -116,8 +116,8 @@ public class LocalApplication {
         // run EMR job flow:
         JobFlowInstancesConfig instances = new JobFlowInstancesConfig()
                 .withInstanceCount(NUM_OF_INSTANCES)
-                .withMasterInstanceType(InstanceType.M4Large.toString())
-                .withSlaveInstanceType(InstanceType.M4Large.toString())
+                .withMasterInstanceType(InstanceType.M4Xlarge.toString())
+                .withSlaveInstanceType(InstanceType.M4Xlarge.toString())
                 .withHadoopVersion("3.2.1")
                 .withEc2KeyName(localAppConfiguration.getAwsKeyPair())
                 .withKeepJobFlowAliveWhenNoSteps(false)

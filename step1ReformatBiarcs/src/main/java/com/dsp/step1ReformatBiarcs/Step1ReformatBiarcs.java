@@ -40,6 +40,9 @@ public class Step1ReformatBiarcs {
                             return false;
                         }
                     }
+                    if(s.toCharArray().length > 9){
+                        return false;
+                    }
                 }
             }
             return true;
