@@ -105,7 +105,7 @@ public class SimilarityCalculator {
         double similarity = 0.0;
 
         if(firstVectorFlag == 1) {
-            for (String feature : unionSet) {
+            for (String feature : vector1.keySet()) {
                 double Px = vector1.getOrDefault(feature, 0.0);
                 double Qx = (Px + vector2.getOrDefault(feature, 0.0)) / 2.0;
 
@@ -117,11 +117,11 @@ public class SimilarityCalculator {
         }
 
         else{
-            for (String feature : unionSet) {
+            for (String feature : vector2.keySet()) {
                 double Px = vector2.getOrDefault(feature, 0.0);
                 double Qx = (Px + vector1.getOrDefault(feature, 0.0)) / 2.0;
 
-                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx);
+                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx + " Px/Qx = " + (Px / Qx) + " Math.log(Px / Qx) = " + Math.log(Px / Qx));
                 // Qx should never be 0 (as the feature x came from one of the two vectors)
                 // so there is no risk of division by 0
                 similarity += Px * Math.log(Px / Qx);
