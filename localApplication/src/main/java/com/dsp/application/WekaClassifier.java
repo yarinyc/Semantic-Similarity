@@ -13,7 +13,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import weka.classifiers.Evaluation;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.J48;
+import weka.filters.supervised.instance.StratifiedRemoveFolds;
 import weka.classifiers.evaluation.ConfusionMatrix;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Instances;
@@ -33,11 +36,11 @@ public class WekaClassifier {
 
         String dataCSVFileName = Paths.get("resources", "data.csv").toString();
         String dataARFFileName = Paths.get("resources", "data.arff").toString();
-        String rawDataFileName = Paths.get("resources", "part-r-00000").toString();
-
-        // TODO maybe add function for downloading the data from s3 to ./resources/ directory
+        String rawDataFileName = Paths.get("resources", "vectors").toString();
 
         if(!new File(dataARFFileName).exists()){ // create the data files (data.csv & data.arff) only if they don't exist
+            // write to resources/vectors our entire data
+            getAllVectorData(rawDataFileName);
             prepareData(dataCSVFileName, dataARFFileName, rawDataFileName);
         }
 
@@ -55,6 +58,17 @@ public class WekaClassifier {
         instances.setClassIndex(2); // index of the target variable - 3rd column is the label
         instances.randomize(new Random(23)); // randomize order of input records
 
+//        StratifiedRemoveFolds strRmvFolds = new StratifiedRemoveFolds();
+////        strRmvFolds.setFold();
+//        strRmvFolds.setNumFolds(10);
+//        strRmvFolds.setSeed(23);
+//        strRmvFolds.setInvertSelection(false);
+//        strRmvFolds.setInputFormat(instances);
+//
+//        FilteredClassifier filteredClassifier = new FilteredClassifier();
+//        filteredClassifier.setFilter(strRmvFolds);
+//        instances = StratifiedRemoveFolds.useFilter(instances, strRmvFolds);
+
         // assign training size and testing size for the classifier
         int trainSize = (int) Math.round(instances.numInstances() * 0.9); // take 90% as training data
         int testSize = instances.numInstances() - trainSize;
@@ -66,20 +80,24 @@ public class WekaClassifier {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 //        NaiveBayes classifier = new NaiveBayes();
-        MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
-        classifier.setLearningRate(0.1);
-        classifier.setMomentum(0.2);
-        classifier.setTrainingTime(100);
-        classifier.setHiddenLayers("3");
+//        MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
+//        classifier.setLearningRate(0.1);
+//        classifier.setMomentum(0.1);
+//        classifier.setTrainingTime(5);
+//        classifier.setHiddenLayers("3,4,3");
+//
+//        filteredClassifier.setClassifier(classifier);
+//        filteredClassifier.buildClassifier(instances);
 
-//        classifier.buildClassifier(trainInstances); // train model
+        J48 classifier = new J48();
 
+        classifier.buildClassifier(trainInstances); // train model
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ evaluate model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         // use test data to evaluate model
-        Evaluation evaluation = new Evaluation(instances);
-//        evaluation.evaluateModel(classifier, testInstances); // normal evaluation
-        evaluation.crossValidateModel(classifier, instances, 10, new Random(23)); // 10-fold cross-validation TODO make sure this is correct
+        Evaluation evaluation = new Evaluation(trainInstances);
+        evaluation.evaluateModel(classifier, testInstances); // normal evaluation
+//        evaluation.crossValidateModel(classifier, instances, 10, new Random(23)); // 10-fold cross-validation TODO make sure this is correct
         System.out.println(evaluation.toSummaryString());
 
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,6 +112,23 @@ public class WekaClassifier {
         System.out.println("Precision: " + evaluation.precision(1)); // TODO check what is this class index
         System.out.println("Recall: " + evaluation.recall(1));
 
+    }
+
+    private static void getAllVectorData(String rawDataFileName) throws IOException {
+        String rawDataDir = Paths.get("resources", "rawData").toString();
+        File vectorsFolder = new File(rawDataDir);
+        File[] files = vectorsFolder.listFiles();
+        File outFile = new File(rawDataFileName);
+        if(!outFile.createNewFile())
+            return;
+        if (files != null) {
+            for (File f : files) {
+                List<String> lines = Files.readAllLines(Paths.get(f.getPath()), StandardCharsets.UTF_8).stream().filter(l -> !l.isEmpty()).collect(Collectors.toList());
+                for (String line : lines) {
+                    Files.write(Paths.get(rawDataFileName), (line+"\n").getBytes(), StandardOpenOption.APPEND);
+                }
+            }
+        }
     }
 
     // convert data from the map reduce flow to csv format and then convert it into .arff format for Weka
@@ -159,14 +194,17 @@ public class WekaClassifier {
         for (String v : vector){
             switch (v) {
                 case "NaN":
-                    nextLine.append(",").append("0"); //TODO what to put instead of NaN
-                    break;
+                    return;
+//                    nextLine.append(",").append("0"); //TODO what to put instead of NaN
+//                    break;
                 case "-Infinity":
-                    nextLine.append(",").append(Double.MIN_VALUE);
-                    break;
+                    return;
+//                    nextLine.append(",").append(Double.MIN_VALUE);
+//                    break;
                 case "Infinity":
-                    nextLine.append(",").append(Double.MAX_VALUE);
-                    break;
+                    return;
+//                    nextLine.append(",").append(Double.MAX_VALUE);
+//                    break;
                 default:
                     nextLine.append(",").append(v);
                     break;
