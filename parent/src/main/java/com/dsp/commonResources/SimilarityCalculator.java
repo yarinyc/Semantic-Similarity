@@ -109,7 +109,7 @@ public class SimilarityCalculator {
                 double Px = vector1.getOrDefault(feature, 0.0);
                 double Qx = (Px + vector2.getOrDefault(feature, 0.0)) / 2.0;
 
-                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx);
+                GeneralUtils.logPrint("KL, P = " + Px + " Q = " + Qx + " Px/Qx = " + (Px / Qx) + " Math.log(Px / Qx) = " + Math.log(Px / Qx));
                 // Qx should never be 0 (as the feature x came from one of the two vectors)
                 // so there is no risk of division by 0
                 similarity += Px * Math.log(Px / Qx);
