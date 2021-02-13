@@ -59,12 +59,7 @@ public class Step1ReformatBiarcs {
         // emit key=rootLexeme, value = Biarc object
         @Override
         public void map(LongWritable lineID, Text line, Context context) throws IOException,  InterruptedException {
-
-//            GeneralUtils.logPrint(lineID.toString() + "\t" + line.toString());
-
             Biarc inputBiarc = Biarc.parseBiarc(line.toString() ,stemmer);
-
-//            GeneralUtils.logPrint("In step1 map: lexeme " + lineID + " Biarc = " + inputBiarc.toString());
             GeneralUtils.logPrint("In step1 map: line id = " + lineID + " input line = " + line.toString());
             if(checkBiarcValidity(inputBiarc.getDependencies(), inputBiarc.getBiarcWords().toString())) { //check biarc dependencies are valid
                 context.write(inputBiarc.getRootLexeme(), inputBiarc);
@@ -129,7 +124,7 @@ public class Step1ReformatBiarcs {
         }
 
 
-        FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output)); // "step_1_results/"
+        FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
         boolean isDone = job.waitForCompletion(true);
 

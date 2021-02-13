@@ -82,7 +82,6 @@ public class Step8CalculateCoOccurrencesVectors {
             String secondWord = splitKey[1];
             GeneralUtils.logPrint("In reduce step 8: l1 = "+ firstWord + " l2 = " + secondWord);
 
-
             // values should be of size 2: all features of first word + all features of second word
             for(Text value : values){
                 List<String> splitValue = Arrays.stream(value.toString().split("\t\t")).filter(x -> !x.isEmpty()).collect(Collectors.toList());

@@ -113,7 +113,7 @@ public class Step2CountLexemesFeatures {
 
         Path inputPath = new Path(s3BucketUrl+input);
         FileInputFormat.addInputPath(job, inputPath);
-        FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output)); // "step_2_results/"
+        FileOutputFormat.setOutputPath(job, new Path(s3BucketUrl+output));
 
         boolean isDone = job.waitForCompletion(true);
 

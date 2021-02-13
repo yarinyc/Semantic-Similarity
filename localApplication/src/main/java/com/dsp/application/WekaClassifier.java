@@ -3,30 +3,28 @@ package com.dsp.application;
 import com.dsp.utils.GeneralUtils;
 import com.dsp.utils.Stemmer;
 
+import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.ConfusionMatrix;
+import weka.classifiers.trees.RandomForest;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVLoader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
-
-import weka.classifiers.Evaluation;
-import weka.classifiers.meta.FilteredClassifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.J48;
-import weka.filters.supervised.instance.StratifiedRemoveFolds;
-import weka.classifiers.evaluation.ConfusionMatrix;
-import weka.classifiers.functions.MultilayerPerceptron;
-import weka.core.Instances;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.CSVLoader;
-import weka.core.converters.ConverterUtils.DataSource;
 
 public class WekaClassifier {
 
-    public static final String CSV_HEADER = "word1,word2,label," +
+    public static final String CSV_HEADER = "label," +
             "freq-manhattan,freq-euclidean,freq-cosine,freq-Jacard,freq-Dice,freq-JS," +
             "prob-manhattan,prob-euclidean,prob-cosine,prob-Jacard,prob-Dice,prob-JS," +
             "PMI-manhattan,PMI-euclidean,PMI-cosine,PMI-Jacard,PMI-Dice,PMI-JS," +
@@ -36,82 +34,48 @@ public class WekaClassifier {
 
         String dataCSVFileName = Paths.get("resources", "data.csv").toString();
         String dataARFFileName = Paths.get("resources", "data.arff").toString();
-        String rawDataFileName = Paths.get("resources", "vectors").toString();
+        String rawDataFileName = Paths.get("resources", "vectors.txt").toString();
 
         if(!new File(dataARFFileName).exists()){ // create the data files (data.csv & data.arff) only if they don't exist
             // write to resources/vectors our entire data
             getAllVectorData(rawDataFileName);
             prepareData(dataCSVFileName, dataARFFileName, rawDataFileName);
         }
-
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ load data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         DataSource source = new DataSource(dataARFFileName);
         Instances instances = source.getDataSet();
-
         // print instances before training the model
         System.out.println(instances.toSummaryString());
-
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ configure data parameters ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // TODO: probably target variable is the label: true/false ||| do we need this? what is the purpose of a class index
-        instances.setClassIndex(2); // index of the target variable - 3rd column is the label
+        instances.setClassIndex(0); // index of the target variable - 3rd column is the label
         instances.randomize(new Random(23)); // randomize order of input records
-
-//        StratifiedRemoveFolds strRmvFolds = new StratifiedRemoveFolds();
-////        strRmvFolds.setFold();
-//        strRmvFolds.setNumFolds(10);
-//        strRmvFolds.setSeed(23);
-//        strRmvFolds.setInvertSelection(false);
-//        strRmvFolds.setInputFormat(instances);
-//
-//        FilteredClassifier filteredClassifier = new FilteredClassifier();
-//        filteredClassifier.setFilter(strRmvFolds);
-//        instances = StratifiedRemoveFolds.useFilter(instances, strRmvFolds);
-
-        // assign training size and testing size for the classifier
-        int trainSize = (int) Math.round(instances.numInstances() * 0.9); // take 90% as training data
-        int testSize = instances.numInstances() - trainSize;
-
-        // instantiate training & test instances
-        Instances trainInstances = new Instances(instances, 0, trainSize);
-        Instances testInstances = new Instances(instances, trainSize, testSize);
-
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-//        NaiveBayes classifier = new NaiveBayes();
-//        MultilayerPerceptron classifier = new MultilayerPerceptron(); // TODO takes a long time or doesn't work
-//        classifier.setLearningRate(0.1);
-//        classifier.setMomentum(0.1);
-//        classifier.setTrainingTime(5);
-//        classifier.setHiddenLayers("3,4,3");
-//
-//        filteredClassifier.setClassifier(classifier);
-//        filteredClassifier.buildClassifier(instances);
-
-        J48 classifier = new J48();
-
-        classifier.buildClassifier(trainInstances); // train model
+        RandomForest classifier = new RandomForest();
+        classifier.setMaxDepth(20);
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ evaluate model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // use test data to evaluate model
-        Evaluation evaluation = new Evaluation(trainInstances);
-        evaluation.evaluateModel(classifier, testInstances); // normal evaluation
-//        evaluation.crossValidateModel(classifier, instances, 10, new Random(23)); // 10-fold cross-validation TODO make sure this is correct
+        Evaluation evaluation = new Evaluation(instances);
+        evaluation.crossValidateModel(classifier, instances, 10, new Random(23)); // 10-fold cross-validation
         System.out.println(evaluation.toSummaryString());
-
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         // a quick overview of the actual classes from our test data versus the predicted values from our model
         ConfusionMatrix confusionMatrix = new ConfusionMatrix(new String[] {"False", "True"});
         confusionMatrix.addPredictions(evaluation.predictions());
 
+        double tp = confusionMatrix.get(1, 1);
+        double fp = confusionMatrix.get(0, 1);
+        double tn = confusionMatrix.get(0, 0);
+        double fn = confusionMatrix.get(1, 0);
+
+        double precision = tp/(tp+fp);
+        double recall = tp/(tp+fn);
+
         System.out.println(confusionMatrix.toString());
-
         System.out.println("Accuracy: " + evaluation.pctCorrect());
-        System.out.println("Precision: " + evaluation.precision(1)); // TODO check what is this class index
-        System.out.println("Recall: " + evaluation.recall(1));
-
+        //System.out.println("Precision: " + evaluation.precision(1));
+        System.out.println("Precision: " + precision);
+        //System.out.println("Recall: " + evaluation.recall(1));
+        System.out.println("Recall: " + recall);
+        System.out.println("F1 score: " + 2 * (precision * recall)/(precision + recall));
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {
@@ -133,7 +97,12 @@ public class WekaClassifier {
 
     // convert data from the map reduce flow to csv format and then convert it into .arff format for Weka
     private static void prepareData(String dataCSVFileName, String dataARFFileName, String rawDataFileName) throws IOException {
-        convertDataToCSV(dataCSVFileName, rawDataFileName);
+
+        GeneralUtils.print("calculating mean values for all columns...");
+        double[] means = calculateMeans(rawDataFileName);
+
+        GeneralUtils.print("creating data.csv file...");
+        convertDataToCSV(dataCSVFileName, rawDataFileName, means);
         GeneralUtils.print("data.csv file was created successfully");
         CSVLoader loader = new CSVLoader();
         loader.setFieldSeparator(",");
@@ -148,7 +117,33 @@ public class WekaClassifier {
         GeneralUtils.print("data.arff file was created successfully");
     }
 
-    private static void convertDataToCSV(String dataCSVFileName, String rawDataFileName) {
+    // calculate the mean (in our case - average) of each column in our data
+    private static double[] calculateMeans(String rawDataFileName) throws IOException {
+        List<String[]> lines = Files.readAllLines(Paths.get(rawDataFileName), StandardCharsets.UTF_8).stream()
+                .filter(l->!l.isEmpty())
+                .map(l-> {
+                    String v = l.split("\t")[1];
+                    return v.substring(1, v.length()-1).split(", ");
+                })
+                .collect(Collectors.toList());
+        double[] means = new double[24];
+        int[] counters = new int[24];
+        for (String[] l : lines){
+            for (int i=1; i<l.length; i++){
+                double number = Double.parseDouble(l[i]);
+                if(!Double.isNaN(number) && Double.isFinite(number)){
+                    means[i-1] += Double.parseDouble(l[i]);
+                    counters[i-1]++;
+                }
+            }
+        }
+        for (int i=0; i<24; i++){
+            means[i] /= counters[i];
+        }
+        return means;
+    }
+
+    private static void convertDataToCSV(String dataCSVFileName, String rawDataFileName, double[] means) {
         Stemmer stemmer = new Stemmer();
         try {
             List<String[]> goldenStandard = parseGoldenStandard(Paths.get("resources", "word-relatedness.txt").toString());
@@ -170,7 +165,7 @@ public class WekaClassifier {
 
                 if(gsLIneOpt.isPresent()){ //Optional object may not be present (should not happen in our file)
                     String[] gsLine = gsLIneOpt.get();
-                    addToCSVFile(dataCSVFileName, splitLine[1], gsLine);
+                    addToCSVFile(dataCSVFileName, splitLine[1], gsLine, means);
                 }
                 else{
                     System.out.println("Error: no gs line found for word pair: " + wordPair[0] + ", " + wordPair[1] );
@@ -185,26 +180,21 @@ public class WekaClassifier {
     }
 
     // append 1 line from data to the .csv file
-    private static void addToCSVFile(String dataCSVFileName, String vectorString, String[] gsLine) throws IOException {
+    // in the case that a value in the vector is NaN or +-Infinity we replace that value with the column's mean value
+    private static void addToCSVFile(String dataCSVFileName, String vectorString, String[] gsLine, double[] means) throws IOException {
         StringBuilder nextLine = new StringBuilder();
         //append w1,w2,label
-        nextLine.append("\n").append(gsLine[0]).append(",").append(gsLine[1]).append(",").append(gsLine[2]);
+        nextLine.append("\n").append(gsLine[2]);
         // append all vector values
         String[] vector = vectorString.substring(1, vectorString.length()-1).split(", ");
-        for (String v : vector){
+        for (int i=0; i<vector.length; i++){
+            String v = vector[i];
             switch (v) {
                 case "NaN":
-                    return;
-//                    nextLine.append(",").append("0"); //TODO what to put instead of NaN
-//                    break;
-                case "-Infinity":
-                    return;
-//                    nextLine.append(",").append(Double.MIN_VALUE);
-//                    break;
                 case "Infinity":
-                    return;
-//                    nextLine.append(",").append(Double.MAX_VALUE);
-//                    break;
+                case "-Infinity":
+                    nextLine.append(",").append(means[i]);
+                    break;
                 default:
                     nextLine.append(",").append(v);
                     break;
