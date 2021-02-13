@@ -30,8 +30,11 @@ public class WekaClassifier {
             "PMI-manhattan,PMI-euclidean,PMI-cosine,PMI-Jacard,PMI-Dice,PMI-JS," +
             "T-test-manhattan,T-test-euclidean,T-test-cosine,T-test-Jacard,T-test-Dice,T-test-JS";
 
-    public static void main(String[] args) throws Exception {
+    public static LocalAppConfiguration config;
 
+    public static void runWeka(LocalAppConfiguration localAppConfiguration) throws Exception {
+
+        config = localAppConfiguration;
         String dataCSVFileName = Paths.get("resources", "data.csv").toString();
         String dataARFFileName = Paths.get("resources", "data.arff").toString();
         String rawDataFileName = Paths.get("resources", "vectors.txt").toString();
@@ -79,7 +82,11 @@ public class WekaClassifier {
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {
+
         String rawDataDir = Paths.get("resources", "rawData").toString();
+        String bucketName = config.getS3BucketName();
+        Runtime.getRuntime().exec("aws s3 cp s3://"+ bucketName +"/step_8_results/ " + rawDataDir + " --recursive");
+
         File vectorsFolder = new File(rawDataDir);
         File[] files = vectorsFolder.listFiles();
         File outFile = new File(rawDataFileName);
@@ -87,6 +94,9 @@ public class WekaClassifier {
             return;
         if (files != null) {
             for (File f : files) {
+                if (f.getName().equals("_SUCCESS")){ // skip this file
+                    continue;
+                }
                 List<String> lines = Files.readAllLines(Paths.get(f.getPath()), StandardCharsets.UTF_8).stream().filter(l -> !l.isEmpty()).collect(Collectors.toList());
                 for (String line : lines) {
                     Files.write(Paths.get(rawDataFileName), (line+"\n").getBytes(), StandardOpenOption.APPEND);

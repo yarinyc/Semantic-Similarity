@@ -1,8 +1,8 @@
 
 EC2 configuration:
 
-    1) Instance type - "m4.large"
-    2) Number of instances used: 8
+    1) Instance type - "M4Xlarge"
+    2) Number of instances used: 9
     3) Region - "US_EAST_1"
 
 EMR configuration:
@@ -14,13 +14,13 @@ EMR configuration:
     1) Add to the config file:
         - your bucketName (bucket should already exist)
         - EC2 keypair
-        - S3 path to the input
+        - S3 paths to the input as a comma seperated list
     2) Run mvn clean install
     3) Upload all jars (except for localApplication.jar) to the s3 URI: s3://${YOUR_BUCKET_NAME}/jars/
     4) In the terminal run: java -jar localApplication.jar: this will run the map reduce flow
     5) To view the mapReduce process, refer to the aws EMR console 
     6) Final map reduce result files will be saved to the s3 URI: s3://**YOUR_BUCKET_NAME**/step_8_results/ in text format
-    7) run WekaClassifier in order to train the model in the data from s3://**YOUR_BUCKET_NAME**/step_8_results/
+    7) In the terminal run: java -jar localApplication WEKA -> this will run the classifier code
 
 **Running times and statistics:**
 
@@ -113,5 +113,33 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
 
 *Weka Classifier*
 
+    - Take our data from the final result directory in our S3 bucket and download it to resources/rawData directory.
+    - Concatenate all files to 1 input file: vectors.txt
+    - convert our raw data file to csv format after some preprocessing: replacing all NaN/Infinity values with mean of feature columns
+    - load data into instances object
+    - create our classifier object: we used a randomForest model with max depth of 20
+    - run 10 fold cross validation
+    - displat final results: confusion matrix, accuracy, precision, recall and F1 score
 
+Weka output:
+
+    Correctly Classified Instances           13517              94.2017 %
+    Incorrectly Classified Instances         832                5.7983 %
+    Kappa statistic                          0.5255
+    Mean absolute error                      0.1059
+    Root mean squared error                  0.2192
+    Relative absolute error                 63.6109 %
+    Root relative squared error             75.9675 %
+    Total Number of Instances               14349
+
+    === Confusion Matrix ===
+
+     a     b     actual class
+    13007    27 |     a = False
+      805   510 |     b = True
+    
+    Accuracy: 94.20168652867795
+    Precision: 0.9497206703910615
+    Recall: 0.38783269961977185
+    F1 score: 0.550755939524838
 

@@ -10,7 +10,6 @@ import java.io.IOException;
 
 public class LocalApplication {
 
-    private static String s3InputPath = "";
     private final static String EMR_EC2_DEFAULT_ROLE = "EMR_EC2_DefaultRole";
     private final static String EMR_DEFAULT_ROLE = "EMR_DefaultRole";
     private final static int NUM_OF_INSTANCES = 8;
@@ -21,7 +20,16 @@ public class LocalApplication {
 
         LocalAppConfiguration localAppConfiguration = new LocalAppConfiguration();
 
-        s3InputPath = localAppConfiguration.getS3InputPath();
+        if(args[0].equals("WEKA") || args[0].equals("weka")){
+            try {
+                WekaClassifier.runWeka(localAppConfiguration);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.exit(0);
+        }
+
+        String s3InputPath = localAppConfiguration.getS3InputPath();
 
         if(DELETE_OUTPUTS) {
             cleanS3Bucket(localAppConfiguration);
