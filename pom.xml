@@ -14,7 +14,7 @@
   <!-- sub modules -->
   <modules>
     <module>parent</module>
-<!--    <module>localApplication</module>-->
+    <module>localApplication</module>
     <module>step1ReformatBiarcs</module>
     <module>step2CountLexemesFeatures</module>
     <module>step3CountFeatures</module>

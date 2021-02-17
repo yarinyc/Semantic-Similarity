@@ -88,6 +88,71 @@ EMR configuration:
         Map output bytes=222182871
         Combine input records=0
         Combine output records=0
+**All files as input:**
+
+    Total runtime: 37 minutes
+    Weka output:
+
+        Correctly Classified Instances           13495               94.0484 %
+        Incorrectly Classified Instances         854                 5.9516 %
+        Kappa statistic                          0.5066
+        Mean absolute error                      0.107
+        Root mean squared error                  0.2195
+        Relative absolute error                  64.2761 %
+        Root relative squared error              76.0799 %
+        Total Number of Instances                14349
+        
+        === Confusion Matrix ===
+            a       b        actual class
+            13010    24 |     a = False
+            830     485 |     b = True
+        
+        Accuracy: 94.0483657397728
+        Precision: 0.9528487229862476
+        Recall: 0.3688212927756654
+        F1 score: 0.5317982456140351
+
+    map-reduce:
+    step1:
+        Map output records=266930246
+		Map output bytes=25337979955
+		Combine input records=0
+		Combine output records=0
+    step2:
+        Map output records=668842937
+		Map output bytes=15989958533
+		Combine input records=668842937
+		Combine output records=100284478
+    step3:
+        Map output records=30733406
+		Map output bytes=602860853
+		Combine input records=30733406
+		Combine output records=8502799
+    step4:
+		Map output records=935773268
+		Map output bytes=12563640439
+		Combine input records=935773268
+		Combine output records=12773488
+    step5:
+		Map output records=31901939
+		Map output bytes=1315123907
+		Combine input records=0
+		Combine output records=0
+    step6:
+		Map output records=33174222
+		Map output bytes=1577878063
+		Combine input records=0
+		Combine output records=0
+    step7:
+		Map output records=6030533
+		Map output bytes=544632990
+		Combine input records=6030533
+		Combine output records=137997
+    step8:
+		Map output records=28469
+		Map output bytes=2728951210
+		Combine input records=0
+		Combine output records=0
 
 **Our implementation:**
 
@@ -186,5 +251,5 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
     - load data into instances object
     - create our classifier object: we used a randomForest model with max depth of 20
     - run 10 fold cross validation
-    - displat final results: confusion matrix, accuracy, precision, recall and F1 score
+    - display final results: confusion matrix, accuracy, precision, recall and F1 score
 

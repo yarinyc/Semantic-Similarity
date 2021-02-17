@@ -5,7 +5,10 @@ import com.dsp.utils.Stemmer;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ConfusionMatrix;
+import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.evaluation.Prediction;
 import weka.classifiers.trees.RandomForest;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
@@ -17,14 +20,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class WekaClassifier {
 
-    public static final String CSV_HEADER = "label," +
+    public static final String CSV_HEADER = "word1,word2,label," +
             "freq-manhattan,freq-euclidean,freq-cosine,freq-Jacard,freq-Dice,freq-JS," +
             "prob-manhattan,prob-euclidean,prob-cosine,prob-Jacard,prob-Dice,prob-JS," +
             "PMI-manhattan,PMI-euclidean,PMI-cosine,PMI-Jacard,PMI-Dice,PMI-JS," +
@@ -50,8 +55,11 @@ public class WekaClassifier {
         // print instances before training the model
         System.out.println(instances.toSummaryString());
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ configure data parameters ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//        instances.randomize(new Random(23)); // randomize order of input records
+        instances.deleteAttributeAt(0);
+        instances.deleteAttributeAt(0);
         instances.setClassIndex(0); // index of the target variable - 3rd column is the label
-        instances.randomize(new Random(23)); // randomize order of input records
+
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         RandomForest classifier = new RandomForest();
         classifier.setMaxDepth(20);
@@ -63,6 +71,7 @@ public class WekaClassifier {
         // a quick overview of the actual classes from our test data versus the predicted values from our model
         ConfusionMatrix confusionMatrix = new ConfusionMatrix(new String[] {"False", "True"});
         confusionMatrix.addPredictions(evaluation.predictions());
+
 
         double tp = confusionMatrix.get(1, 1);
         double fp = confusionMatrix.get(0, 1);
@@ -79,13 +88,48 @@ public class WekaClassifier {
         //System.out.println("Recall: " + evaluation.recall(1));
         System.out.println("Recall: " + recall);
         System.out.println("F1 score: " + 2 * (precision * recall)/(precision + recall));
+
+        System.out.println();
+        CSVLoader loader = new CSVLoader();
+        loader.setFieldSeparator(",");
+        loader.setSource(new File(dataCSVFileName));
+        Instances data = loader.getDataSet();
+        ArrayList<Prediction> predictions = evaluation.predictions();
+        int x = 0;
+        for (int i=0; i<predictions.size(); i++) {
+            Prediction p = predictions.get(i);
+            Instance instance = data.get(i);
+            if(p.predicted() == 1.0 && p.predicted() == p.actual()) {
+                System.out.println(instance);
+                System.out.println(p.toString());
+                System.out.println();
+                x++;
+            }
+            if(x>100){
+                break;
+            }
+        }
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {
 
         String rawDataDir = Paths.get("resources", "rawData").toString();
+        String vectorsTxt = Paths.get("resources", "vectors.txt").toString();
         String bucketName = config.getS3BucketName();
-        Runtime.getRuntime().exec("aws s3 cp s3://"+ bucketName +"/step_8_results/ " + rawDataDir + " --recursive");
+        File rawDataDirFile = new File(rawDataDir);
+        if(!rawDataDirFile.exists() && !new File(vectorsTxt).exists()) {
+            try {
+                GeneralUtils.print("Downloading results from s3...");
+                Runtime.getRuntime()
+                        .exec("aws s3 cp s3://" + bucketName + "/step_8_results/ " + rawDataDir + " --recursive")
+                        .waitFor(10, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            GeneralUtils.print("vectors.txt data file exists");
+        }
 
         File vectorsFolder = new File(rawDataDir);
         File[] files = vectorsFolder.listFiles();
@@ -194,7 +238,7 @@ public class WekaClassifier {
     private static void addToCSVFile(String dataCSVFileName, String vectorString, String[] gsLine, double[] means) throws IOException {
         StringBuilder nextLine = new StringBuilder();
         //append w1,w2,label
-        nextLine.append("\n").append(gsLine[2]);
+        nextLine.append("\n").append(gsLine[0]).append(",").append(gsLine[1]).append(",").append(gsLine[2]);
         // append all vector values
         String[] vector = vectorString.substring(1, vectorString.length()-1).split(", ");
         for (int i=0; i<vector.length; i++){
