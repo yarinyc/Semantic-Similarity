@@ -20,7 +20,7 @@ public class LocalApplication {
 
         LocalAppConfiguration localAppConfiguration = new LocalAppConfiguration();
 
-        if(args[0].equals("-WEKA") || args[0].equals("-weka")){
+        if((args.length > 0) && (args[0].equals("-WEKA") || args[0].equals("-weka"))){
             try {
                 WekaClassifier.runWeka(localAppConfiguration);
             } catch (Exception e) {

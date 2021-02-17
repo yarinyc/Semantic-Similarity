@@ -16,7 +16,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,7 +31,7 @@ public class Step4CountLexemes {
             GeneralUtils.setDebug(debug);
         }
 
-        // for each lexeme  emit lexeme with it's count
+        // for each lexeme emit lexeme with it's count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
             GeneralUtils.logPrint("In step4 map: lexeme = " + key.toString() + " count = " + value.getTotalCount().get());
@@ -72,14 +71,14 @@ public class Step4CountLexemes {
             GeneralUtils.setDebug(debug);
         }
 
-        // for each lexeme calculate sum & increase COUNTL counter by 1 ( calculates count(F=f) & count(F) )
+        // for each lexeme calculate sum & increase COUNTL counter by sum ( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
             long sum = 0;
             for (LongWritable value : values) {
                 sum += value.get();
             }
-            context.getCounter(GeneralUtils.Counters.COUNTL).increment(1);
+            context.getCounter(GeneralUtils.Counters.COUNTL).increment(sum);
             GeneralUtils.logPrint("In step4 reduce: lexeme = " + key.toString() + " count = " + sum);
             context.write(key, new LongWritable(sum));
         }

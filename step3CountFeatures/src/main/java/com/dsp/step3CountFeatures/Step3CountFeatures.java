@@ -27,10 +27,7 @@ public class Step3CountFeatures {
         // auxiliary function to make sure we all keys are of <l,f> structure
         public boolean checkPairValidity(String key) {
            String[] spiltKey = key.split(",");
-           if(spiltKey.length !=2 || spiltKey[0].isEmpty() || spiltKey[1].isEmpty()){
-               return false;
-           }
-           return true;
+            return spiltKey.length == 2 && !spiltKey[0].isEmpty() && !spiltKey[1].isEmpty();
         }
 
         @Override
@@ -78,14 +75,14 @@ public class Step3CountFeatures {
             GeneralUtils.setDebug(debug);
         }
 
-        // for each feature calculate sum & increase COUNTF counter by 1 ( calculates count(F=f) & count(F) )
+        // for each feature calculate sum & increase COUNTF counter by sum ( calculates count(F=f) & count(F) )
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException,  InterruptedException {
             long sum = 0;
             for (LongWritable value : values) {
                 sum += value.get();
             }
-            context.getCounter(GeneralUtils.Counters.COUNTF).increment(1);
+            context.getCounter(GeneralUtils.Counters.COUNTF).increment(sum);
             GeneralUtils.logPrint("In step3 reduce: feature = " + key.toString() + " count = " + sum);
             context.write(key, new Text(Long.toString(sum)));
         }

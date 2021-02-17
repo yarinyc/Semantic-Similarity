@@ -29,7 +29,7 @@ public class Step2CountLexemesFeatures {
             GeneralUtils.setDebug(debug);
         }
 
-        // for each biarc emit all its features + total count
+        // For each biarc and for each lexeme in it, emit all its features + total count
         @Override
         public void map(Text key, Biarc value, Context context) throws IOException,  InterruptedException {
 
@@ -51,7 +51,6 @@ public class Step2CountLexemesFeatures {
                     GeneralUtils.logPrint("In step2 map: <lexeme,feature> = " + outKey.toString() + " count = " + value.getTotalCount().get());
                     context.write(outKey, count);
                 }
-
             }
         }
     }
