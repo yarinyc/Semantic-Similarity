@@ -20,7 +20,7 @@ EMR configuration:
     4) In the terminal run: java -jar localApplication.jar: this will run the map reduce flow
     5) To view the mapReduce process, refer to the aws EMR console 
     6) Final map reduce result files will be saved to the s3 URI: s3://**YOUR_BUCKET_NAME**/step_8_results/ in text format
-    7) In the terminal run: java -jar localApplication WEKA -> this will run the classifier code
+    7) In the terminal run: java -jar localApplication -WEKA -> this will run the classifier code
 
 **Running times and statistics:**
 
