@@ -105,10 +105,8 @@ public class WekaClassifier {
                 System.out.println();
                 x++;
             }
-            if(x>100){
-                break;
-            }
         }
+        System.out.println(x);
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {

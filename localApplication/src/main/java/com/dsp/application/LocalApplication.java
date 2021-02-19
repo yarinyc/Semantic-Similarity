@@ -77,7 +77,7 @@ public class LocalApplication {
         HadoopJarStepConfig hadoopJarStep8 = new HadoopJarStepConfig()
                 .withJar(localAppConfiguration.getS3BucketUrl() + "jars/step8CalculateCoOccurrencesVectors.jar")
                 .withArgs(localAppConfiguration.getS3BucketName(), "step_7_results/", "step_8_results/", Boolean.toString(DEBUG))
-                .withMainClass("Step7CalculateVectors");
+                .withMainClass("Step8CalculateCoOccurrencesVectors");
 
 
         // hadoop step configs:
