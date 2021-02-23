@@ -92,37 +92,45 @@ public class WekaClassifier {
         System.out.println("F1 score: " + 2 * (precision * recall)/(precision + recall));
 
         // classifying data to extract TP,FP,TN,FN - uncomment below lines to run
+        // getPredictions(dataCSVFileName, classifier);
 
-//        System.out.println();
-//        CSVLoader loader = new CSVLoader();
-//        loader.setFieldSeparator(",");
-//        loader.setSource(new File(dataCSVFileName));
-//        Instances data = loader.getDataSet();
-//        int numInstances = 1000;
-//
-//        List<String> wordsList = new ArrayList();
-//
-//        for(int i=0; i<numInstances; i++){
-//            Instance instance = data.get(i);
-//            String words = instance.stringValue(0)+ "\t" + instance.stringValue(1);
-//            String ground_truth = instance.stringValue(2);
-//            wordsList.add(words + "\t" + ground_truth);
-//        }
-//
-//        data.deleteAttributeAt(0);
-//        data.deleteAttributeAt(0);
-//        data.setClassIndex(0);
-//        Instances trainData = data.trainCV(10,0);
-//        Instances testData = data.testCV(10,0);
-//
-//        classifier.buildClassifier(trainData);
-//
-//        for(int i=0; i<numInstances; i++){
-//            Instance instance = testData.get(i);
-//            double prediction = classifier.classifyInstance(instance);
-//            System.out.println(wordsList.get(i) + "\t" + prediction);
-//        }
+    }
 
+    // auxiliary function to extract predictions from the model
+    private static void getPredictions(String dataCSVFileName, RandomForest classifier) throws Exception {
+        System.out.println();
+        CSVLoader loader = new CSVLoader();
+        loader.setFieldSeparator(",");
+        loader.setSource(new File(dataCSVFileName));
+        Instances data = loader.getDataSet();
+        int numInstances = 1400;
+
+        Instances trainData = data.trainCV(10,0);
+        Instances testData = data.testCV(10,0);
+
+        List<String> wordsList = new ArrayList();
+
+        for(int i=0; i<numInstances; i++){
+            Instance instance = testData.get(i);
+            String words = instance.stringValue(0)+ "\t" + instance.stringValue(1);
+            String ground_truth = instance.stringValue(2);
+            wordsList.add(words + "\t" + ground_truth);
+        }
+
+        trainData.deleteAttributeAt(0);
+        trainData.deleteAttributeAt(0);
+        trainData.setClassIndex(0);
+        testData.deleteAttributeAt(0);
+        testData.deleteAttributeAt(0);
+        testData.setClassIndex(0);
+
+        classifier.buildClassifier(trainData);
+
+        for(int i=0; i<numInstances; i++){
+            Instance instance = testData.get(i);
+            double prediction = classifier.classifyInstance(instance);
+            System.out.println(wordsList.get(i)  + "\t" + prediction);
+        }
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {

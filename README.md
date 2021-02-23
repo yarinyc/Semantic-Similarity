@@ -271,9 +271,9 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
     FP:
       1) glider, animation
          It seems that some contexts of both words can share common words related to movement
-      2) dress, arm
+      2) bomb, limitation
          It seems that some contexts of both words can share common words related to the human body
-      3) toaster, building
+      3) mug, co-author
          Unclear to us
 
     TN:
