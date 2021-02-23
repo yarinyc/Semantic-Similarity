@@ -5,14 +5,14 @@ import com.dsp.utils.Stemmer;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ConfusionMatrix;
-import weka.classifiers.evaluation.NominalPrediction;
-import weka.classifiers.evaluation.Prediction;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 import weka.core.converters.ConverterUtils.DataSource;
+
+
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +60,8 @@ public class WekaClassifier {
         instances.deleteAttributeAt(0);
         instances.setClassIndex(0); // index of the target variable - 3rd column is the label
 
+        instances.stratify(10);
+
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ classification model ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         RandomForest classifier = new RandomForest();
         classifier.setMaxDepth(20);
@@ -89,24 +91,38 @@ public class WekaClassifier {
         System.out.println("Recall: " + recall);
         System.out.println("F1 score: " + 2 * (precision * recall)/(precision + recall));
 
-        System.out.println();
-        CSVLoader loader = new CSVLoader();
-        loader.setFieldSeparator(",");
-        loader.setSource(new File(dataCSVFileName));
-        Instances data = loader.getDataSet();
-        ArrayList<Prediction> predictions = evaluation.predictions();
-        int x = 0;
-        for (int i=0; i<predictions.size(); i++) {
-            Prediction p = predictions.get(i);
-            Instance instance = data.get(i);
-            if(p.predicted() == 1.0 && p.predicted() == p.actual()) {
-                System.out.println(instance);
-                System.out.println(p.toString());
-                System.out.println();
-                x++;
-            }
-        }
-        System.out.println(x);
+        // classifying data to extract TP,FP,TN,FN - uncomment below lines to run
+
+//        System.out.println();
+//        CSVLoader loader = new CSVLoader();
+//        loader.setFieldSeparator(",");
+//        loader.setSource(new File(dataCSVFileName));
+//        Instances data = loader.getDataSet();
+//        int numInstances = 1000;
+//
+//        List<String> wordsList = new ArrayList();
+//
+//        for(int i=0; i<numInstances; i++){
+//            Instance instance = data.get(i);
+//            String words = instance.stringValue(0)+ "\t" + instance.stringValue(1);
+//            String ground_truth = instance.stringValue(2);
+//            wordsList.add(words + "\t" + ground_truth);
+//        }
+//
+//        data.deleteAttributeAt(0);
+//        data.deleteAttributeAt(0);
+//        data.setClassIndex(0);
+//        Instances trainData = data.trainCV(10,0);
+//        Instances testData = data.testCV(10,0);
+//
+//        classifier.buildClassifier(trainData);
+//
+//        for(int i=0; i<numInstances; i++){
+//            Instance instance = testData.get(i);
+//            double prediction = classifier.classifyInstance(instance);
+//            System.out.println(wordsList.get(i) + "\t" + prediction);
+//        }
+
     }
 
     private static void getAllVectorData(String rawDataFileName) throws IOException {

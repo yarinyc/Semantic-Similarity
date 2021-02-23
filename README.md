@@ -22,138 +22,6 @@ EMR configuration:
     6) Final map reduce result files will be saved to the s3 URI: s3://**YOUR_BUCKET_NAME**/step_8_results/ in text format
     7) In the terminal run: java -jar localApplication -WEKA -> this will run the classifier code
 
-**Communication, Running Times And Results:**
-
-**1 file as input:**
-
-    Total runtime: 8 minutes
-    Weka output:
-        Correctly Classified Instances           13294               92.9845 %
-        Incorrectly Classified Instances         1003                7.0155 %
-        Kappa statistic                          0.3737
-        Mean absolute error                      0.1269
-        Root mean squared error                  0.245
-        Relative absolute error                  76.2613 %
-        Root relative squared error              84.9512 %
-        Total Number of Instances                14297
-        
-        === Confusion Matrix ===
-         a     b     actual class
-        12962    26 |     a = False
-        977     332 |     b = True
-        
-        Accuracy: 92.9845422116528
-        Precision: 0.9273743016759777
-        Recall: 0.25362872421695953
-        F1 score: 0.3983203359328135
-
-    map-reduce:
-    step1:
-        Map output records=15959876
-        Map output bytes=1288709999
-        Combine input records=0
-        Combine output records=0
-    step2:
-        Map output records=37068550
-        Map output bytes=809631148
-        Combine input records=37068550
-        Combine output records=6349356
-    step3:
-        Map output records=4066765
-        Map output bytes=76553601
-        Combine input records=4066765
-        Combine output records=1854329
-    step4:
-        Map output records=53028414
-        Map output bytes=661129484
-        Combine input records=53028414
-        Combine output records=1098362
-    step5:
-        Map output records=4433911
-        Map output bytes=160686739
-        Combine input records=0
-        Combine output records=0
-    step6:
-        Map output records=4704074
-        Map output bytes=194638449
-        Combine input records=0
-        Combine output records=0
-    step7:
-        Map output records=577889
-        Map output bytes=51359905
-        Combine input records=577889
-        Combine output records=69821
-    step8:
-        Map output records=26375
-        Map output bytes=222182871
-        Combine input records=0
-        Combine output records=0
-**All files as input:**
-
-    Total runtime: 37 minutes
-    Weka output:
-
-        Correctly Classified Instances           13495               94.0484 %
-        Incorrectly Classified Instances         854                 5.9516 %
-        Kappa statistic                          0.5066
-        Mean absolute error                      0.107
-        Root mean squared error                  0.2195
-        Relative absolute error                  64.2761 %
-        Root relative squared error              76.0799 %
-        Total Number of Instances                14349
-        
-        === Confusion Matrix ===
-            a       b        actual class
-            13010    24 |     a = False
-            830     485 |     b = True
-        
-        Accuracy: 94.0483657397728
-        Precision: 0.9528487229862476
-        Recall: 0.3688212927756654
-        F1 score: 0.5317982456140351
-
-    map-reduce:
-    step1:
-        Map output records=266930246
-		Map output bytes=25337979955
-		Combine input records=0
-		Combine output records=0
-    step2:
-        Map output records=668842937
-		Map output bytes=15989958533
-		Combine input records=668842937
-		Combine output records=100284478
-    step3:
-        Map output records=30733406
-		Map output bytes=602860853
-		Combine input records=30733406
-		Combine output records=8502799
-    step4:
-		Map output records=935773268
-		Map output bytes=12563640439
-		Combine input records=935773268
-		Combine output records=12773488
-    step5:
-		Map output records=31901939
-		Map output bytes=1315123907
-		Combine input records=0
-		Combine output records=0
-    step6:
-		Map output records=33174222
-		Map output bytes=1577878063
-		Combine input records=0
-		Combine output records=0
-    step7:
-		Map output records=6030533
-		Map output bytes=544632990
-		Combine input records=6030533
-		Combine output records=137997
-    step8:
-		Map output records=28469
-		Map output bytes=2728951210
-		Combine input records=0
-		Combine output records=0
-
 **Our implementation:**
 
 In order to calculate the similarities between lexemes, we run a mapReduce job flow with the following steps:
@@ -249,7 +117,177 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
     - Concatenate all files to 1 input file: vectors.txt
     - convert our raw data file to csv format after some preprocessing: replacing all NaN/Infinity values with mean of feature columns
     - load data into instances object
-    - create our classifier object: we used a randomForest model with max depth of 20
+    - create our classifier object: we used a randomForest model with max depth of 20 (Note: other tested models were logistic regression classifier,decision tree, multilayer perceptron)
     - run 10 fold cross validation
     - display final results: confusion matrix, accuracy, precision, recall and F1 score
 
+**Communication, Running Times And Results:**
+
+**1 file as input:**
+
+    Total runtime: 8 minutes
+    Weka output:
+        Correctly Classified Instances           13294               92.9845 %
+        Incorrectly Classified Instances         1003                7.0155 %
+        Kappa statistic                          0.3737
+        Mean absolute error                      0.1269
+        Root mean squared error                  0.245
+        Relative absolute error                  76.2613 %
+        Root relative squared error              84.9512 %
+        Total Number of Instances                14297
+        
+        === Confusion Matrix ===
+         a     b     actual class
+        12962    26 |     a = False
+        977     332 |     b = True
+        
+        Accuracy: 92.9845422116528
+        Precision: 0.9273743016759777
+        Recall: 0.25362872421695953
+        F1 score: 0.3983203359328135
+
+    map-reduce:
+    step1:
+        Map output records=15959876
+        Map output bytes=1288709999
+        Combine input records=0
+        Combine output records=0
+    step2:
+        Map output records=37068550
+        Map output bytes=809631148
+        Combine input records=37068550
+        Combine output records=6349356
+    step3:
+        Map output records=4066765
+        Map output bytes=76553601
+        Combine input records=4066765
+        Combine output records=1854329
+    step4:
+        Map output records=53028414
+        Map output bytes=661129484
+        Combine input records=53028414
+        Combine output records=1098362
+    step5:
+        Map output records=4433911
+        Map output bytes=160686739
+        Combine input records=0
+        Combine output records=0
+    step6:
+        Map output records=4704074
+        Map output bytes=194638449
+        Combine input records=0
+        Combine output records=0
+    step7:
+        Map output records=577889
+        Map output bytes=51359905
+        Combine input records=577889
+        Combine output records=69821
+    step8:
+        Map output records=26375
+        Map output bytes=222182871
+        Combine input records=0
+        Combine output records=0
+
+**All files as input:**
+
+    Total runtime: 37 minutes
+    Weka output:
+
+        Correctly Classified Instances       13500               94.0832 %
+        Incorrectly Classified Instances       849                5.9168 %
+        Kappa statistic                          0.5124
+        Mean absolute error                      0.1055
+        Root mean squared error                  0.2195
+        Relative absolute error                 63.3699 %
+        Root relative squared error             76.094  %
+        Total Number of Instances            14349
+        
+        === Confusion Matrix ===
+        
+             a     b     actual class
+        13006    28 |     a = False
+          821   494 |     b = True
+        
+        Accuracy: 94.08321137361489
+        Precision: 0.946360153256705
+        Recall: 0.37566539923954373
+        F1 score: 0.537833424060969
+
+
+    map-reduce:
+    step1:
+        Map output records=266930246
+		Map output bytes=25337979955
+		Combine input records=0
+		Combine output records=0
+    step2:
+        Map output records=668842937
+		Map output bytes=15989958533
+		Combine input records=668842937
+		Combine output records=100284478
+    step3:
+        Map output records=30733406
+		Map output bytes=602860853
+		Combine input records=30733406
+		Combine output records=8502799
+    step4:
+		Map output records=935773268
+		Map output bytes=12563640439
+		Combine input records=935773268
+		Combine output records=12773488
+    step5:
+		Map output records=31901939
+		Map output bytes=1315123907
+		Combine input records=0
+		Combine output records=0
+    step6:
+		Map output records=33174222
+		Map output bytes=1577878063
+		Combine input records=0
+		Combine output records=0
+    step7:
+		Map output records=6030533
+		Map output bytes=544632990
+		Combine input records=6030533
+		Combine output records=137997
+    step8:
+		Map output records=28469
+		Map output bytes=2728951210
+		Combine input records=0
+		Combine output records=0
+
+**Analysis:**
+
+    Below are wordPair examples of TP, FP, TN, FN predictions made by our model:
+    
+    TP:
+      1) butterfly, animal
+         For obvious reasons, there is a connecntion between both words and the model identifies it correctly
+      2) toaster, device
+         Same explanation as above
+      3) lion, predator
+         Same explanation as above
+
+    FP:
+      1) glider, animation
+         It seems that some contexts of both words can share common words related to movement
+      2) dress, arm
+         It seems that some contexts of both words can share common words related to the human body
+      3) toaster, building
+         Unclear to us
+
+    TN:
+      1) piano, airspace
+         Both words are semanticaly unrelated, and the model identifies that
+      2) broccoli, bomb
+         Same explanation as above
+      3) banana, strategy
+         Same explanation as above
+
+    FN:
+      1) bull, mammal
+         It seems that most contexts do not capture the connection in semantics of both words
+      2) bottle, container
+         same explanation as above
+      3) cannon, weapon
+         same explanation as above
