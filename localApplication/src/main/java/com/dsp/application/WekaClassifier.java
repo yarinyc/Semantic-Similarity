@@ -55,7 +55,6 @@ public class WekaClassifier {
         // print instances before training the model
         System.out.println(instances.toSummaryString());
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ configure data parameters ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//        instances.randomize(new Random(23)); // randomize order of input records
         instances.deleteAttributeAt(0);
         instances.deleteAttributeAt(0);
         instances.setClassIndex(0); // index of the target variable - 3rd column is the label

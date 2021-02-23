@@ -71,13 +71,7 @@ public class Step2CountLexemesFeatures {
             for (LongWritable value : values) {
                 sum += value.get();
             }
-            String lexeme = key.toString().split(",")[0];
-            Stemmer stem = new Stemmer();
 
-            if(lexeme.equals(GeneralUtils.stem("glider",stem)) || lexeme.equals(GeneralUtils.stem("animation",stem))|| lexeme.equals(GeneralUtils.stem("bomb",stem))|| lexeme.equals(GeneralUtils.stem("limitation",stem))||lexeme.equals(GeneralUtils.stem("mug",stem))
-            ||lexeme.equals(GeneralUtils.stem("co-author",stem))||lexeme.equals(GeneralUtils.stem("bull",stem))||lexeme.equals(GeneralUtils.stem("mammal",stem))||lexeme.equals(GeneralUtils.stem("bottle",stem))||lexeme.equals(GeneralUtils.stem("container",stem))||lexeme.equals(GeneralUtils.stem("cannon",stem))||lexeme.equals(GeneralUtils.stem("weapon",stem))) {
-                System.err.println(key.toString());
-            }
             GeneralUtils.logPrint("In step2 reduce: <lexeme,feature> = " + key.toString() + " count = " + sum);
             context.write(key, new LongWritable(sum));
         }

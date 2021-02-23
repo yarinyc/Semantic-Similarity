@@ -2,7 +2,7 @@
 EC2 configuration:
 
     1) Instance type - "M4Xlarge"
-    2) Number of instances used: 9
+    2) Number of instances used: 8
     3) Region - "US_EAST_1"
 
 EMR configuration:
@@ -193,18 +193,18 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
     Total runtime: 37 minutes
     Weka output:
 
-        Correctly Classified Instances       13500               94.0832 %
-        Incorrectly Classified Instances       849                5.9168 %
+        Correctly Classified Instances           13500               94.0832 %
+        Incorrectly Classified Instances         849                 5.9168 %
         Kappa statistic                          0.5124
         Mean absolute error                      0.1055
         Root mean squared error                  0.2195
-        Relative absolute error                 63.3699 %
-        Root relative squared error             76.094  %
-        Total Number of Instances            14349
+        Relative absolute error                  63.3699 %
+        Root relative squared error              76.094  %
+        Total Number of Instances                14349
         
         === Confusion Matrix ===
         
-             a     b     actual class
+            a     b     actual class
         13006    28 |     a = False
           821   494 |     b = True
         
@@ -270,11 +270,14 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
 
     FP:
       1) glider, animation
-         It seems that some contexts of both words can share common words related to movement
+         It seems that some contexts of both words can share common features:
+         flight-conj, flew-rcmod, dawn-nn, imagin-rcmod, etc.
       2) bomb, limitation
-         It seems that some contexts of both words can share common words related to the human body
+         It seems that some contexts of both words can share common features:
+         militari-amod, concern-partmod, object-dobj, secret-amod, etc.
       3) mug, co-author
-         Unclear to us
+         It seems that some contexts of both words can share common features:
+         and-amod, for-dep, object-dobj, write-rcmod, etc.
 
     TN:
       1) piano, airspace
@@ -286,8 +289,14 @@ In order to calculate the similarities between lexemes, we run a mapReduce job f
 
     FN:
       1) bull, mammal
-         It seems that most contexts do not capture the connection in semantics of both words
+         It seems that the size of the intersection of feature sets of both words is of size 384
+         and the size of the symmetric difference is 7319.
+         Therefore it's easy to see how the model classifies the words as not related.
       2) bottle, container
-         same explanation as above
+         It seems that the size of the intersection of feature sets of both words is of size 1328
+         and the size of the symmetric difference is 13631.
+         Therefore it's easy to see how the model classifies the words as not related.
       3) cannon, weapon
-         same explanation as above
+         It seems that the size of the intersection of feature sets of both words is of size 259
+         and the size of the symmetric difference is 2553.
+         Therefore it's easy to see how the model classifies the words as not related.
