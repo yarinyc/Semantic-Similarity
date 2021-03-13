@@ -1,3 +1,10 @@
+*Overview:*
+
+	Using Hadoop map reduce we go over google's Biarc dataset and analyze the data according to this article: https://bib.irb.hr/datoteka/507889.ljubesic08-comparing.pdf
+	After analyzing the data we use the Weka java API to train a model.
+	We evaluate the trained model by applying 10-fold cross validation on the provided dataset.
+	The final result are the Precision, Recall and F1 scores of the classifier.
+
 
 EC2 configuration:
 
