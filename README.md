@@ -1,13 +1,14 @@
 *Overview:*
 
-	Using Hadoop map reduce we go over google's Biarc dataset and analyze the data according to this article: https://bib.irb.hr/datoteka/507889.ljubesic08-comparing.pdf
-	We build Cooccurrence vectors that will be based on the words which are directly connected to the given word in the syntactic trees.
-	For example, given the sentence "My dog also likes eating sausage" ,our syntactic-based method, will pick the feature 'dog' for 'likes',
-	since there is a 'subj' edge between them. 
-	We define the features as pairs of words and dependency-labels, i.e., the words which are connected in the syntactic tree to the given word and the label on the edges between them.
-	After analyzing the data we use the Weka java API to train a model.
-	We evaluate the trained model by applying 10-fold cross validation on the provided dataset.
-	The final result are the Precision, Recall and F1 scores of the classifier.
+Using Hadoop map reduce we go over google's Biarc dataset and analyze the data according to this article: https://bib.irb.hr/datoteka/507889.ljubesic08-comparing.pdf
+We build Cooccurrence vectors that will be based on the words which are directly connected to the given word in the syntactic trees.
+For example, given the sentence "My dog also likes eating sausage" ,our syntactic-based method, will pick the feature 'dog' for 'likes',
+since there is a 'subj' edge between them. 
+We define the features as pairs of words and dependency-labels, i.e., the words which are connected in the syntactic tree to the given word and the label on the edges
+between them.
+After analyzing the data we use the Weka java API to train a model.
+We evaluate the trained model by applying 10-fold cross validation on the provided dataset.
+The final result are the Precision, Recall and F1 scores of the classifier.
 
 
 EC2 configuration:
